@@ -1,0 +1,583 @@
+Docker :
+https://docker-curriculum.com/					---- good for Docker beginner
+https://docs.docker.com/engine/reference/run/			---- good for Docker expert
+https://deis.com/blog/2015/creating-sharing-first-docker-image/ ---- good for DockerFile
+http://goinbigdata.com/docker-run-vs-cmd-vs-entrypoint/		---- good for RUN , CMD, ENTRYPOINT
+====================================================================================================================================================
+Understanding Ports :
+------------------------------------
+TCP - Transmission control protocol
+UDP - User datagram protocol
+FTP - File transfer protocol
+
+port 20 - In active mode FTP, the server additionally uses port 20 to initiate data transfers back to the FTP client.
+port 21 - FTP servers uses TCP port 21 to listens for FTP commands coming at this point and responds accordingly.
+port 22 - Secure Shell (SSH) uses port 22. SSH servers listen on this port for incoming login requests from remote clients. 
+port 80 - Most famous port on the Internet, TCP port 80 is the default that HTTP uses
+port 22 - XBox live gaming uses this port too.
+port 1023 and above - TCP and UDP port numbers between 1024 and 49151 are registered ports. 
+		      The Internet Assigned Numbers Authority maintains a listing of services using these ports in order to minimize conflicting uses.
+
+====================================================================================================================================================
+Installation :
+------------------------------------
+* sudo yum install wget
+  sudo wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  sudo rpm -ivh epel-release-latest-7.noarch.rpm
+  sudo yum install ansible -y
+
+
+* sudo apt-get update
+  sudo apt-get install docker.io
+
+* sudo docker version
+====================================================================================================================================================
+
+Docker commands :
+----------------------------------------------------------------------------------------------------------------------------------------------------
+$ docker login					---- Create an account in Docker hub.
+$ docker 					---- will show all docker commands that can be used.
+$ docker run hello-world			---- Displays "Hello from Docker." saying that the Docker is working perfectly on our system.
+$ docker pull busybox				---- Fetches the image of busybox from docker repository (latest version).
+$ docker pull busybox:12.04			---- Fetches the image of busybox from docker repository (12.04  version).
+$ docker run busybox				---- Runs the busybox container	from fetched image.
+$ docker run busybox echo "hello from busybox"	---- Runs the busybox container	and echo "hello from busybox".
+$ docker search image_name			---- Used to find images by image name, user name, or description.
+$ docker push user_name/image_name		---- Push a repository to its registry, for this to work, we should have named an image (while building) or committed our 							     container to a named image.
+$ docker images					---- show the list of all images on local system.
+$ docker ps 					---- Shows all running containers.
+$ docker ps -a					---- Shows the list of all containers that ran. Status will be 'exited'.
+$ docker run -it busybox sh			---- Running this with '-it' flags attaches us to an interactive tty (terminal) in the container.
+$ docker exec -ti CONTAINER_ID bash		---- makes us to go inside the terminal of a container.
+$ docker rm Container_ID1 Container_ID2		---- Removes container-id from ps -a.
+$ docker rm $(docker ps -a -q -f status=exited)	---- Deletes containers with status 'exited' (-q only returns the numeric IDs and -f filters output on conditions given).
+-------------------------------------------------------------------------------------
+$ docker-compose ps 				---- Display ports
+$ docker-compose up 				---- Display ports
+-------------------------------------------------------------------------------------
+
+
+$ docker images ---- lists all images on your system.
+REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+prakhar1989/catnip              latest              c7ffb5626a50        2 hours ago         697.9 MB
+prakhar1989/static-site         latest              b270625a1631        21 hours ago        133.9 MB
+python                          3-onbuild           cf4002b2c383        5 days ago          688.8 MB
+busybox                         latest              c51f86c28340        9 weeks ago         1.109 MB
+hello-world                     latest              0a6ba66e537a        11 weeks ago        960 B
+
+
+$ docker ps -a ---- shows all containers that are currently running or ran. 'STATUS' column will show if it is running or exited.
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+305297d7a235        busybox             "uptime"            11 minutes ago      Exited (0) 11 minutes ago                       distracted_goldstine
+ff0a5c3750b9        busybox             "sh"                12 minutes ago      Exited (0) 12 minutes ago                       elated_ramanujan
+
+
+$ docker run -it busybox sh
+/ # ls
+bin   dev   etc   home  proc  root  sys   tmp   usr   var
+/ # uptime
+ 05:45:21 up  5:58,  0 users,  load average: 0.00, 0.01, 0.04
+---- Running the 'run' with '-it' flags, attaches us to an interactive 'tty' in the container. Now, we can run as many commands in the container as we want.
+
+
+$ docker rm $(docker ps -a -q -f status=exited)
+---- It deletes all containers that have a status of exited. 
+     The '-q' flag, only returns the numeric IDs and '-f' filters output based on conditions provided. 
+     One last thing that'll be useful is the --rm flag that can be passed to docker run which automatically deletes the container once it's exited from. 
+     For one off docker runs, --rm flag is very useful.
+
+
+$ docker run prakhar1989/static-site
+---- As, the image doesn't exist locally, client fetches the image from the registry & run it. If all goes well, message 'Nginx is running...' appears on terminal. 
+     Now, that the server is running, how do see the website ? 
+     What port is it running on? And more importantly, how do we access the container directly from our host machine ?
+
+     Well in this case, the client is not exposing any ports so we need to re-run the docker run command to publish ports. 
+     While we're at it, we should also find a way so that our terminal is not attached to the running container. 
+     This way, you can happily close your terminal and keep the container running. This is called detached mode.
+
+
+$ docker run -d -P --name static-site prakhar1989/static-site
+e61d12292d69556eabe2a44c16cbd54486b2527e2ce4f95438e504afb7b02810
+---- In above command, '-d' will detach our terminal, '-P' will publish all exposed ports to random ports and finally '--name' corresponds to a name we want to give. 
+     Now we can see the ports by running the docker port [CONTAINER] command
+
+
+$ docker port static-site
+80/tcp -> 0.0.0.0:32769
+443/tcp -> 0.0.0.0:32768
+
+
+$ docker run -p 8888:80 prakhar1989/static-site
+Nginx is running...
+---- You can also specify a custom port to which the client will forward connections to the container.
+
+
+$ docker stop container_ID
+---- To stop a detached container.
+
+
+* An important distinction to be aware of when it comes to images is the difference between base and child images.
+  - Base images are images that have no parent image, usually images with an OS like ubuntu, busybox or debian.
+  - Child images are images that build on base images and add additional functionality.
+
+
+* Then there are official and user images, which can be both base and child images.
+  - Official images are images that are officially maintained and supported by the folks at Docker. These are typically one word long. 
+    In the list of images above, the python, ubuntu, busybox and hello-world images are base images.
+  - User images are images created and shared by users like you and me. They build on base images and add additional functionality. 
+    Typically, these are formatted as user/image-name.
+
+
+$ docker run -t -i --name myFirstContainer ubuntu /bin/bash
+---- If image (base) is not present locally, the image will be pulled from docker repository.
+     "/bin/bash" means that the script should always be run with bash, rather than another shell.
+     If, we type "docker ps" from another machine, we can see the container-id of "myFirstContainer" running.
+     And, if we exit from docker conainer and type "docker ps -a" in another machine, we can see the container-id of "myFirstContainer" in stopped status.
+
+
+====================================================================================================================================================
+Find Host-IP of docker container :
+------------------------------------
+Consider 'prakhar1989/static-site' as XX, a docker image file in Docker hub.
+$ docker run XX					---- 'XX' is a docker image. It will get downloaded & run. Successful run displays 'Nginx is running...'
+$ docker run -d -P --name static-site XX	---- '-d' detaches our terminal, '-P' publishes all exposed ports to random ports & '--name' will be the image name. 
+$ docker port static-site			---- Shows the ports 
+o/p : 80/tcp -> 0.0.0.0:32769
+      443/tcp -> 0.0.0.0:32768
+
+$ docker run -p 8888:80 prakhar1989/static-site ---- Can also specify a custom port to which the client will forward connections to the container.
+o/p : Nginx is running...
+
+$ docker stop Container_ID
+====================================================================================================================================================
+$** docker run -d -p 9090:80 -t nginx 		    ---- It creates a container with the image ‘nginx’ and bind the container’s port 80 to the host machine’s port 9090.
+						         You can verify this using ‘docker ps‘ command.
+
+$ docker built -t redis-server	.		    ---- this command creates the image.
+$ docker run --name redis_instance -t redis_server  ---- As the image has been created, run this command to create a container running a Redis server instance inside.
+							 It creates a container with name redis_instance. Without name for the container, container IDs gets created with 	
+							 complex alphanumeric names.
+
+Base images
+Child images
+Official images
+User images
+
+====================================================================================================================================================
+Docker File :
+------------------------------------
+$ git clone https://github.com/prakhar1989/docker-curriculum
+$ cd docker-curriculum/flask-app
+---- This should be cloned on the machine where you are running the docker commands and not inside a docker container.
+
+
+* Create a new blank file in our text-editor and save it in the same folder as the flask app by the name of 'Dockerfile'. Content will be like below :
+  # our base image
+  FROM python:3-onbuild
+
+  # specify the port number the container should expose
+  EXPOSE 5000
+
+  # run the application
+  CMD ["python", "./app.py"]
+
+$ docker build -t prakhar1989/catnip .
+---- The docker build command takes an optional tag name with '-t' and a location of the directory containing the 'Dockerfile' (don't forget the period).
+
+$ docker run -p 8888:5000 prakhar1989/catnip
+---- The last step is to run the image and see if it actually works. 
+     This command used port 5000 for the server inside the container, and exposed this externally on port 8888. 
+     Head over to the URL with port 8888, where your app should be live. Ex: 192.168.99.100:8888
+
+
+
+Docker on AWS :
+-------------
+$ docker push prakhar1989/catnip
+---- Pushes the image on AWS. It is important to have the format of username/image_name, so that the client knows where to publish.
+
+$ docker run -p 8888:5000 prakhar1989/catnip
+---- Now, that your image is online, anyone who has docker installed can play with your app by typing above command.
+
+
+Docker File  (1) :
+---------------------------------------
+* FROM ubuntu ---- This instruction is used to set the base image for subsequent instructions. It is mandatory to set this in the first line of a Dockerfile.
+
+* MAINTAINER <name> ----   This is a non-executable instruction used to indicate the author of the Dockerfile.
+
+* RUN apt-get update && apt-get install -y redis-server
+  CMD ["python", "./app.py"]
+  It execute a command on top of an existing layer and create a new layer with the results of command execution.
+  Example, if there is a pre-condition to install PHP before running an application, we can run appropriate commands to install PHP on top of base image ( Ubuntu).
+
+* CMD "echo" "Hello World!"
+  Major difference between 'CMD' and 'RUN' is 'CMD' doesn’t execute anything during the build time. It just specifies the intended command for the image. 
+
+  'CMD' tells the container which command it should run when it is started. It can be overridden from the command line by passing a new command to be run.
+  Example, if default CMD, defined in dockerfile is 'CMD node server.js' but we want to exec into the container, try 'docker run imageName:tagName /bin/sh/'
+
+  'RUN' actually executes the command during build time. It is used when writing the buildscript for an image via dockerfile, to define steps that will be executed,
+  when you build an image from the file using 'docker build -t imageName:tagName .' .A dockerfile can have many RUN steps defined.
+
+  'RUN' steps can be used to modify the state of the image being constructed. 
+  For example: if I have node and npm available in my docker image, and have copied a package.json into the image,  
+  I can use RUN npm install to make the dependencies defined by the package.json available in my container.
+
+
+  Note: There can be many 'RUN' steps defined in a docker file but can have only one 'CMD' instruction in it. If we add more, only the last one takes effect.
+
+
+* CMD "Hello World!"
+    ENTRYPOINT echo
+  You can use this instruction to set the primary command for the image.
+  Example, if you have installed only one application in your image and want it to run whenever the image is executed, ENTRYPOINT is the instruction for you.
+  Note: arguments are optional, and you can pass them during the runtime with something like docker run <image-name>.
+  Also, all the elements specified using CMD will be overridden, except the arguments. They will be passed to the command specified in ENTRYPOINT.
+
+NOTE : 
+********
+RUN	   - executes command(s) in a new layer and creates a new image. E.g., it is often used for installing software packages.
+CMD  	   - sets default command and/or parameters, which can be overwritten from command line when docker container runs.
+ENTRYPOINT - configures a container that will run as an executable.
+
+
+
+
+* LABEL version="1.0" description="This is a sample desc"
+  
+* EXPOSE 6456    ----   While running our service in the container, we may want our container to listen on specified ports. 'EXPOSE' instruction does that.
+
+* ENV var_home="/var/etc"    ---- It is used to set the environment variables in the container.
+
+* COPY preconditions.txt /usr/temp    ---- It is used to copy files and directories from a source to a destination (in the file system of the container).
+
+* ADD http://www.site.com/downloads/sample.tar.xz /usr/src
+  COPY flask-app /opt/flask-app
+  It is similar to the 'COPY' with few added features like remote URL support in the source field and local-only tar extraction. 
+  But if you don’t need a extra features, it is suggested to use COPY as it is more readable.
+
+* VOLUME /data    ---- It enables access to a location on the host system from a container. Just pass the path of the location to be accessed.
+
+* USER daemon    ---- This is used to set the UID (or username) to use when running the image.
+
+* WORKDIR /user
+    WORKDIR home
+    RUN pwd
+  This is used to set the currently active directory for other instructions such as RUN, CMD, ENTRYPOINT, COPY and ADD.
+  Note that if relative path is provided, the next WORKDIR instruction will take it as relative to the path of previous WORKDIR instruction.
+
+* ONBUILD RUN rm -rf /usr/temp
+  It adds a trigger instruction to be executed when the image is used as the base for some other image. 
+  It behaves as if a RUN instruction is inserted immediately after the FROM instruction of the downstream Dockerfile. 
+  This is helpful in cases where we need a static base image with a dynamic config value that changes whenever a new image has to be built (on top of the base image).
+
+* Two main line blocks in a Dockerfile: comments (# comment) and instructions (Instruction [arguments]).
+  # Display "Hello World!"
+  RUN echo "Hello World!"
+
+----------------------------------------------------------
+Building Docker image of Redis service: ------------------
+----------------------------------------------------------
+* DockerFile creation : -------
+-------------------------------
+
+# Set the base image
+FROM ubuntu
+
+# Dockerfile author / maintainer 
+MAINTAINER Name <email.id@here> 
+
+# Update application repository list and install the Redis server. 
+RUN apt-get update && apt-get install -y redis-server
+
+# Expose default port
+EXPOSE 6379
+
+# Set the default command
+ENTRYPOINT ["/usr/bin/redis-server"]
+-------------------------------
+
+* Building the Docker Image : -
+-------------------------------
+$ docker build -t redis-server .    ----> As the Dockerfile is ready, let’s run this command to create the image.
+A path is a mandatory argument for the build command. We used '.' as the path because we’re currently in the same directory. 
+We also used the -t flag to tag the image.
+
+
+-------------------------------
+Run a Redis-Server Instance : -
+-------------------------------
+$ docker run --name redis_instance -t redis-server    ----> As the image has been created, run this command to create a container running a Redis server instance inside.
+It creates a container with name redis_instance. 
+It is a good practice to assign a name for the container or else container IDs gets created with complex alphanumeric names.
+
+========================================================================================================================================
+
+Dockerfile   (2) :
+------------------
+Application and docker file will be at same place...
+# our base image
+FROM python:3-onbuild
+# specify the port number the container should expose
+EXPOSE 5000
+# run the application
+CMD ["python", "./app.py"]
+
+Once, the docker file is created in same directory where the flaskapp lies, run the below command to create a docker image :
+$ docker build -t prakhar1989/catnip .
+$ docker image 					---- shows prakhar1989/catnip as an image
+$ docker run -p 8888:5000 prakhar1989/catnip	---- run the image to check if it is working fine
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+---- The command we just ran used port 5000 for the server inside the container, and exposed this externally on port 8888. 
+     Head over to the URL with port 8888, where your app should be live. Type 192.168.99.100:8888
+
+========================================================================================================================================
+
+Multi-container Environments :
+-------------------------------
+Flask Application - 8888:5000
+Elastic Search    - 9200:9200 - e931ab24dedc
+
+$ docker search elasticsearch
+$ docker run -dp 9200:9200 elasticsearch
+$ curl 0.0.0.0:9200
+{
+  "name" : "Ultra-Marine",
+  "cluster_name" : "elasticsearch",
+  "version" : {
+    "number" : "2.1.1",
+    "build_hash" : "40e2c53a6b6c2972b3d13846e450e66f4375bd71",
+    "build_timestamp" : "2015-12-15T13:05:55Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.3.1"
+  },
+  "tagline" : "You Know, for Search"
+}
+-- Write docker file of flask app
+$ docker build -t prakhar1989/foodtrucks-web .
+$ docker run -P prakhar1989/foodtrucks-web	---- error, time out
+  To make this work, we need to tell the Flask container that the ES container is running on 0.0.0.0 host (the port by default is 9200) and that will work, right?       
+  Unfortunately that is not correct. Since the IP 0.0.0.0 is the IP to access ES container from the host machine i.e. from my Mac. 
+  Another container will be unable to access this on the same IP address. Okay, then which IP address should the ES container be accessible by ?
+
+$ docker network ls
+$ docker network inspect bridge			---- shows the Host ip (172.17.0.2/16) and container Id of Elastic Search.
+$ docker run -it --rm prakhar1989/foodtrucks-web bash
+	root@35180ccc206a:/opt/flask-app# curl 172.17.0.2:9200
+	bash: curl: command not found
+	root@35180ccc206a:/opt/flask-app# apt-get -yqq install curl
+	root@35180ccc206a:/opt/flask-app# curl 172.17.0.2:9200	---- now, Flask app can talk to Elastic search on 172.17.0.2:9200
+	{
+	  "name" : "Jane Foster",
+	  "cluster_name" : "elasticsearch",
+	  "version" : {
+	    "number" : "2.1.1",
+	    "build_hash" : "40e2c53a6b6c2972b3d13846e450e66f4375bd71",
+	    "build_timestamp" : "2015-12-15T13:05:55Z",
+	    "build_snapshot" : false,
+	    "lucene_version" : "5.3.1"
+	  },
+	  "tagline" : "You Know, for Search"
+	}
+	root@35180ccc206a:/opt/flask-app# exit
+
+
+Multi-container Environments via bridge :
+-----------------------------------------
+$ docker network create foodtrucks		---- new bridge network
+$ docker ps
+$ docker stop e931ab24dedc			---- ES container id
+$ docker run -dp 9200:9200 --net foodtrucks --name es elasticsearch
+$ docker network inspect foodtrucks
+$ docker run -it --rm --net foodtrucks prakhar1989/foodtrucks-web bash
+	root@53af252b771a:/opt/flask-app# curl es:9200
+	bash: curl: command not found
+	root@53af252b771a:/opt/flask-app# apt-get -yqq install curl
+	root@53af252b771a:/opt/flask-app# curl es:9200
+	root@53af252b771a:/opt/flask-app# python app.py
+
+$ docker run -d --net foodtrucks -p 5000:5000 --name foodtrucks-web prakhar1989/foodtrucks-web
+$ curl -I 0.0.0.0:5000
+Head over to http://0.0.0.0:5000 and see your glorious app live! 
+
+========================================================================================================================================
+2.0 Multi-container Environments :
+-------------------------------
+$ docker pull mysql
+$ docker pull wordpress
+
+Run the databse image first and set that up.
+$ docker run --name akb-sql -e MYSQL_ROOT_PASSWORD=password -d mysql:latest
+  '--name akb-sql' can be any name
+  '-e MYSQL_ROOT_PASSWORD=password' For wordpress, we need to provide the environment variable 'MYSQL_ROOT_PASSWORD=password'
+
+$ docker run --name akb-wordpress --link akb-sql:mysql -p 8080:80 -d wordpress
+
+$ docker-machine ip		---- 192.168.99.100
+  Let us know the local ip of this machine, go to the browser and type '192.168.99.100:8080' and we will be navigated to instance of word press 
+
+-------------------------------  
+3.0 Multi-container Environments :
+-------------------------------
+$ docker run -it -d ubuntu 		---- download the image, run that container and deattcah the container from the terminal
+$ docker exec -it 295acd477f06 bash	---- login the container bash
+$ apt-get update			---- update the package manager
+$ apt-get install nginx			---- install the nginx
+$ curl localhost 			---- to see if web server is up
+$ apt-get install curl			---- install the curl
+$ curl localhost 			---- to see if web server is up
+$ service nginx reload
+$ service nginx restart			---- if nothing is active, make it active. Welcome to nginx page will appear
+$ exit
+Now, we have a container which has a web service. Now, log out of that.
+
+$ docker run -it -d ubuntu 		---- download the another image, run that container and deattcah the container from the terminal
+$ docker exec -it 764010b9d0d9 bash	---- login the container bash
+$ nodejs -v				---- nodejs is already installed (v4.2.6), if not install it
+$ npm install express 
+
+
+
+
+
+
+
+
+
+
+
+
+
+========================================================================================================================================
+Docker Compose (1) :
+--------------------
+$ pip install docker-compose
+$ docker-compose version
+  docker-compose version 1.7.1, build 0a9ab35
+
+
+docker-compose.yml
+------------------
+version: "2"
+services:
+  es:
+    image: elasticsearch		---- we refer to the elasticsearch image available on the Docker Hub.
+  web:
+    image: prakhar1989/foodtrucks-web	---- we refer to the image that we built at beginning of this section.
+    command: python app.py
+    ports:
+      - "5000:5000"
+    volumes:				---- specifies a mount point in our web container where the code will reside. Optional but useful, if access to logs etc is needed. 
+      - .:/code
+
+$ docker stop $(docker ps -q)	---- Before starting, make sure that related ports are free. So, if the Flask and ES containers running, lets turn them off.
+  39a2f5df14ef
+  2a1b77e066e6
+
+$ docker-compose up		---- Navigate to the food trucks directory and then run docker-compose up. Running the container in attached mode.
+Ctrl + C 			---- For quitting the running instance
+
+$ docker-compose up -d		---- Re-running the container in detached mode.
+$ docker-compose ps
+      Name                    Command               State           Ports
+  ----------------------------------------------------------------------------------
+  foodtrucks_es_1    /docker-entrypoint.sh elas ...   Up      9200/tcp, 9300/tcp
+  foodtrucks_web_1   python app.py                    Up      0.0.0.0:5000->5000/tcp
+
+$ docker-compose stop		---- For stopping the services from running. 
+$ docker network rm foodtrucks	---- For removing the previous created network 'foodtrucks'.
+$ docker-compose up -d		---- Rerun the docker-compose again to see if any network has been created by docker-compose.
+$ docker network ls		---- Yes, it is there 'foodtrucks_default'.
+  NETWORK ID          NAME                 DRIVER
+  0c8b474a9241        bridge               bridge              
+  293a141faac3        foodtrucks_default   bridge              
+  b44db703cd69        host                 host                
+  0474c9517805        none                 null
+
+We see that compose created a new network 'foodtrucks_default' and attached both the new services in that network, so that each of these are discoverable to the other. 
+Each container for a service joins the default network and is both reachable by other containers on that network, and discoverable by them at a hostname identical to the 
+
+container name. 
+
+
+---------------------
+Docker Compose (2) :|
+---------------------
+docker-compose.yml :|
+---------------------
+mysql:
+  image: mysql:5.7
+  ports:
+    - "3306"
+
+$ docker-compose ps                                                    
+  Name                     Command               State            Ports
+-------------------------------------------------------------------------------------
+  mysql_1       docker-entrypoint.sh mysqld      Up      0.0.0.0:32769->3306/tcp
+
+========================================================================================================================================
+Docker Machine:
+----------------
+
+========================================================================================================================================
+Docker Swarm :
+----------------
+
+
+
+========================================================================================================================================
+Docker Extra:
+----------------
+$ docker exec -ti CONTAINER_ID bash				---- makes us to go inside the terminal of a container.
+$ exit 								---- log out of any container
+$ docker inspect CONTAINER_ID					---- gives the IP address of that container ("IPAddress": "172.17.0.3")
+$ docker inspect CONTAINER_ID | egrep '"IPAddress":[^,]+='	---- gives the IP address of that container ("IPAddress": "172.17.0.3")
+$ docker run -ti ubuntu:14.04 /bin/bash				---- start a container and go inside it in command bash
+
+Note: If we want to quit a container without stopping it and go back to host, press "CTRL+P+Q". It will minimise the current running container.
+      If we want to get attached to a deattached container, type "$ docker attach Container_ID/ Name_of_container"
+      If we want to quit and exit from a container, press "CTRL+D". It will terminate the current running container. All unsaved changes will wipe-off.
+
+$ docker top Container_ID/ Name_of_container			---- tells, what kind of application is running in container
+$ docker stop Container_ID/ Name_of_container			---- stops the running container
+
+* cd /var/lib/docker/						---- tells, whats on the system
+  ----> cd containers ----> ls					---- we can see the long name of each Container_Id ruuning on the system
+  	----> cd Container_Id 					---- we can see configuration files out there that are present inside a running container
+	      ----> cat hostname 				---- we can see shows the host name
+
+
+$ docker run -d -ti --name duck ubuntu:14.04 /bin/bash		---- without 'ti' we can start the container but will not be able to go inside it.
+
+
+---------------------
+Persistent Storage :-
+---------------------
+$ docker run -ti -v /data --name=duck2 ubuntu:14.04  /bin/bash	---- use "-v" for persistent volume and give a storage point"/data", any directory name.
+								---- even though the container stops, the content will still be there.
+  ----> ls 							---- will show 'data' directory which got created with "-v" parameter
+  ----> cd data ----> touch a b 1 2				---- create files a,b,1,2 and press "Ctrl+P+Q" and come to host directory of host
+$ cd /var/lib/docker/ ----> cd volumes ----> ls			---- shows some directory with name with random_digits
+  ----> cd random_digits ----> ls ----> _data			---- this shows the same directory which we used with "-v" for persistent volume
+	----> cd _data/ ----> ls ----> a,b,1,2			---- this shows the same files which we created under container 
+
+Note: If we attach to duck2 again and delete file '1' and exit from the container, file '1' will get deleted from '/var/lib/docker/volumes/randoom_digits/_data' too.
+
+$ docker run -ti -v /srv/duck3:/data --name=duck3 ubuntu:14.04  /bin/bash  ---- if "/srv/duck3:/data" is to be used for persistent volume
+
+
+-------------------------------------
+Containers with network connection :-
+-------------------------------------
+$ docker run -d -p 3306 -ti mysql				---- '-p 3306' is the port number of container, but this command won't start the container
+$ docker ls							---- will not show any Container_Id
+$ docker run -d -p 3306 -ti mysql /bin/bash			---- '-p 3306' is the port number of the container and the container will get started
+$ docker ls							---- will show Container_Id, Image, etc...
+$ iptables -L -t nat 						---- 'nat (Network Address Translation)' lists all dockeer ports and its container IPs
+  Under 'Chain DOCKER' tab, we see 'tcp dpt:32769 to:172.17.0.8:3306' where 'dpt:32769' is Docker port and '172.17.0.8:3306' is its internal IP address
+
+$ docker run -d -p 3306:3306 -ti mysql /bin/bash		---- first '3306' is Host port and second '3306' is conainer's port
+
+====================================================================================================================================================
