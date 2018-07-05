@@ -1,0 +1,109 @@
+***********************************************************************************
+http://www.servermom.org/2-cents-tip-how-to-enable-epel-repo-on-centos-6-and-5/894/ 				- ENABLE EPEL REPO ON CENTOS
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/ch-yum - YUM description
+http://www.intowindows.com/how-to-boot-and-install-from-iso-in-virtualbox/ 					- Boot and install from ISO in VirtualBox in Windows
+https://www.tecmint.com/20-practical-examples-of-rpm-commands-in-linux/ 					- rpm command in Linux
+http://www.differencebetween.net/technology/difference-between-yum-and-rpm/ 					- difference between YUM and RPM
+https://superuser.com/questions/125933/what-is-the-difference-between-yum-apt-get-rpm-configure-make-install 	- YUM, APT-GET, RPM and WGET
+https://www.oxxus.net/techblog/2011/07/yum-vs-apt-get-differences/ 						- difference between YUM and APT-GET
+https://www.digitalocean.com/community/tutorials/how-to-set-up-and-use-yum-repositories-on-a-centos-6-vps	- Configuring YUM 
+https://www.cyberciti.biz/faq/installing-rhel-epel-repo-on-centos-redhat-7-x/					- Configuring YUM - good
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sec-configuring_yum_and_yum_repositories - Configuring YUM 
+* https://extr3metech.wordpress.com/2013/05/23/configuring-network-in-centos-6-3-virtual-box-screenshots/ 	- Configuring Network in CentOS Dynamic and Static.
+* https://www.server-world.info/en/note?os=CentOS_7&p=httpd&f=1 						- Install Apache httpd
+
+rpm  - Redhat Package Manager is a default & most popular package management utility for Red Hat based systems like (RHEL, CentOS and Fedora).
+     - RPM is free and released under GPL (General Public License).
+
+EPEL - Extra Packages for Enterprise Linux
+RedHat (RHEL) - YUM - EPEL
+CentOS - EPEL
+
+Redhat / Centos
+Ubuntu / Debian
+YUM - Primary tool for installing, deleting, querying and managing RHEL RPM software packages from official Red Hat software repositories.
+ISO image - Image file for creating virtualization
+
+What is the difference between WGET and CURL
+
+-------------------------------------------------------------------------------------
+# For RHEL/CentOS 6 32-Bit # download
+wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+## For RHEL/CentOS 6 32-Bit ## installing
+rpm -ivh epel-release-6-8.noarch.rpm
+ 
+# For RHEL/CentOS 6 64-Bit # download
+wget http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+## For RHEL/CentOS 6 64-Bit ## installing
+rpm -ivh epel-release-6-8.noarch.rpm
+
+
+# For RHEL/CentOS 5 32-Bit # download
+wget http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+## For RHEL/CentOS 5 32-Bit ## installing
+rpm -ivh epel-release-5-4.noarch.rpm
+
+# For RHEL/CentOS 5 64-Bit # download
+wget http://download.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm
+## For RHEL/CentOS 5 64-Bit ## installing
+rpm -ivh epel-release-5-4.noarch.rpm
+-------------------------------------------------------------------------------------
+
+* yum install epel-release -y 	# shows the default rpm "Package epel-release.noarch 0:7-5 will be installed
+* yum repolist			# confirms the presence of repo list
+
+If we want to use rpm from other version, then :
+* cd /tmp
+* wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm	# download the epel of particular version
+* yum install epel-release-latest-7.noarch.rpm					# installs that epel and create metadata
+* yum repolist									# confirms the presence of repo list
+
+
+Disbale all other repo and search desired things under "epel" only:
+*******************************************************************
+To list all available packages under a repo called epel, enter:
+$ yum --disablerepo="*" --enablerepo="epel" list available
+OR
+$ yum --disablerepo="*" --enablerepo="epel" list available | grep 'package'
+OR
+$ yum --disablerepo="*" --enablerepo="epel" list available | less
+
+
+Some useful commands :
+**********************
+## search it ##
+yum search htop
+ 
+## get more info, if found ##
+yum info htop
+ 
+## install it ##
+yum install htop
+
+-------------------------------------------------------------------------------------
+
+yum --enablerepo=epel [command] [package name]
+
+Replace the [command] part with one of these:
+– install
+– update
+– check-update
+– upgrade
+– remove or erase
+– list
+– provides or whatprovides
+– search
+– info
+– clean
+– shell
+– resolvedep
+– localinstall
+– localupdate
+– deplist
+
+* Command below displays information about a package nginx, the most popular fast Web server:
+  yum --enablerepo=epel info nginx
+* Now finally install the package you want to. And the command for that is:
+  yum --enablerepo=epel install nginx
+-------------------------------------------------------------------------------------
+
