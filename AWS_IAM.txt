@@ -1,0 +1,101 @@
+AWS IAM (Identity and Access Management):
+IAM Components :
+++++++++++++++++
+* Users
+* Groups
+* Roles
+* Policies
+
+Users :
++++++++
+For creating a new user :
+* Come to AWS and login into the account and click on "IAM" under "Security Identity and Compliance" list and a dashboard appears.
+* Click on "Users" and then "Add Users".
+* Type "User name" and under "Access type" select both "Programmatic access" and "AWS Management Console access"
+  Programmatic access - for programs, if they want to use AWS account via API.
+						Selecting this would generates "access key ID" and "secret access key"
+  AWS Management Console access - for users, who directly want to deploy using AWS website.
+* Select "Custom Password" and give the password.
+* Under "Require Password reset", uncheck the box "User must create a new password at next sign-in"
+* Click on "Next: Permissions" to go to the next page.
+
+In next page :
+* Click on "Attach Existing Policies directly" and check "Policy name" from the list of accesses which we want to assign to the new user.
+* Click on "Next: Review" to go to next page.
+
+In next page :
+* Review all setting which we have saved and finally click on "Create User"
+It will create a new user and will display on the screen with "Access key ID" and "Secret access key".
+This "Secret access key" can be viewed ONLY ONE TIME. So, save it somewhere permanently.
+
+New user will not be logging in with same ASW sign-in page and URL will be displayed on the dashboard of IAM.
+"https://edurekacloud.signin.aws.amazon.com/console"
+Copy the URL, sign-out from root account and open the copied URL in the browser.
+A new sign-in page will appear with following options :
+---------------------------------------------------------------------------------------
+Account   : edurekacloud	#### self filled from the URL link						  |
+User Name : hemant			#### new user name that we created from root account	  |
+Password  : ******			#### password which we set from root account for new user |
+---------------------------------------------------------------------------------------
+
+
+Groups :
+++++++++
+For creating a new group :
+* Come to AWS and login into the account and click on "IAM" under "Security Identity and Compliance" list and a dashboard appears.
+* Click on "Groups" & then "Create New Group". A page comes for assigning a name to the new group. Name it & click on "Next Step" to go to next page.
+* Check "Policy name" from the list of accesses which we want to assign to the new group. Example, select just "AmazonS3FullAccess".
+* Click on "Next Step" to go to next page where we will, review all setting which we have saved and finally click on "Create Group".
+  [Policies name would be "arn:aws:iam::aws:policy/AmazonS3FullAccess"]
+
+For verification, we will create one more "Test" user :
+
+* Click on "Users" and then "Add Users".
+* Type "User name" as "test" and under "Access type" select "AWS Management Console access"
+* Select "Cutom Password" and give the password.
+* Under "Require Password reset", uncheck the box "User must create a new password at next sign-in"
+* Click on "Next: Permissions" to go to the next page.
+* In next page, click on "Add user to group", the group name that we created newly will appear, check that group & click "Next: Review" to go to next page.
+* In next page, review all setting which we have saved and finally click on "Create User".
+* It will not show "Access key ID" and "Secret access key" for the "test" user, as we have not checked "Programmatic access" while creating "test" user.
+* New user will not be logging in with same ASW sign-in page and URL will be displayed on the dashboard of IAM.
+  "https://edurekacloud.signin.aws.amazon.com/console"
+  Copy the URL, sign-out from root account and open the copied URL in the browser.
+  A new sign-in page will appear with following options :
+---------------------------------------------------------------------------------------
+Account   : edurekacloud	#### self filled from the URL link						  |
+User Name : test			#### new user name that we created from root account	  |
+Password  : ******			#### password which we set from root account for new user |
+---------------------------------------------------------------------------------------
+* We wll just hace access to S3 functions.
+* Now, come to "root" AWS account, click on "IAM", click on "Groups", select the group, come to "Permissions" tab and click on "Detach Policy".
+* Now, come to "test" AWS account, click on S3, it will throw access issue.
+
+
+Roles :
++++++++
+An IAM role is an IAM entity that defines a set of permissions for making AWS service requests. IAM roles are not associated with a specific user or group.
+Instead, trusted entities assume roles such as, IAM users, applications or AWS service such as EC2.
+
+20:15
+* Come to AWS and login into the account and click on "IAM" under "Security Identity and Compliance" list and a dashboard appears.
+* Click on "Roles" & then "Create new role". A page comes "Select role type" where we need to create a role type of "EC2", so select "Amazon EC2".
+* A new page appears "Attach Policy", regarding what type of role we want to apply, suppose "AmazonS3FullAccess", check on that & click on "Next Step".
+* A new page appears "Set role name and review". So, give the role name like "edureka_1" and click on "Create role".
+  The page would look like :
+  Role name 	   : edureka_1
+  Role description : Allows EC2 instance to call AWS services on your behalf
+  Trusted entities : The identity provider(s) ec2.amazonaws.com
+  Policies 		   : arn:aws:iam::aws:policy/AmazonS3FullAccess
+* Now, the role has been created with name "edureka_1" but we have not attached this role to any EC2 instance.
+  So, go to EC2 instance and attach this particular policy to it.
+* Go to EC2 instance, select the instance (running). Go to "Actions" tab and "Instance Settings" and click on "Attach/Replace IAM roles".
+* A new page (Attach/Replace IAM role) appears. In "IAM role", select "edureka_1" role from dropdown box. and click on "Apply".
+  It will come back to EC2 dashboard. and one EC2 instance has been configured to interact with S3 service.
+  So, any application we deploy in this instance will be able to interact with S3 service. (No need to specify any "Access key ID" and "Secret access key").
+  
+
+Policies : (22:36)
+++++++++++
+To assign permissions to a user, group, role or resource, we create a policy which is a document that explicitly lists permissions.
+

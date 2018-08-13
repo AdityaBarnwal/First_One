@@ -1,0 +1,142 @@
+Dcoker Kubernetes :
+docker rm $( docker ps -q -f status=exited)
+-------------------
+On Master :
+* kubeadm init --pod-network-cidr=<> --apiserver-advertise-address=<ip-adress-of-master>
+  kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=192.168.31.175
+  // For starting a Calico CNI: 192.168.0.0/16 (range of Calico) or for starting a Flannel CNI: 10.244.0.0/16 (range of Flannel)
+     So, all IP of containers inside this pod will be assigned an IP address in this range (192.168.0.0/16)
+     CNI - Container Network Interface  (Calico and Flannel are two popular CNIs)
+  // After completion of above command, we will be c=shown a lis of commands to run in sequence.
+  1. mkdir -p $HOME/.kube
+  2. cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  3. chown $(id -u):$(id -g) $HOME/.kube/config
+  4. You can join any number of machines by running the following on each node as root :
+     kubeadm join 192.168.56.101:6443 --token rsv7eq.f6...w3 --discovery-token-ca-cert-hash sha256:c54....2e
+
+// So, after we run commands 1, 2 and 3, we need to bring up the dash board and setting up the pod network.
+   So, we have to setup a Calico pod and then dash board. We must start the dash board first and then add nodes.
+
+// For creating a POD based on Calico
+*  kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+   It will copy the template of calico.yml from above link, So, calico controller is created
+
+// So, at this point we can see if Master is connected to a particular pod. Run the below command :
+*  kubectl get nodes
+   And it will show the below :
+   NAME		STATUS 		ROLES		AGE		VERSION
+   master	Ready		master		3m		v1.10.2
+
+// To see what are all Pods running, type below command :
+*  kubectl get pods --all-namespaces -o wide
+
+// For creating the dashboard first - bring this up in the master machine before starting Nodes.
+*  kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+   So, kubernetes dashboard has been created
+
+// To enable proxy and continues with new terminal window. It will give the port number on which dashboard is being served.
+*  kubectl proxy 			=> Starting to serve on 127.0.0.1:8001
+   Come to browser and type "localhost:8001" and the screen will open. But in raw mode, so we need to activate service account.
+
+// To create a service account for your dashboard :
+*  kubectl create serviceaccount dashboard -n default
+  
++++++++++++++++++ Upto 42:26 completed +++++++++++++++++ 
+
+*  kubectl get nodes								=> Status of Nodes
+*  kubectl get pods --all-namespaces				=> Status of Pods
+*  kubectl get -o wide pods --all-namespaces		=> Detailed status of Pods
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+https://www.howtoforge.com/tutorial/centos-kubernetes-docker-cluster/
+Self-installation :
+-------------------
+* setenforce 0
+* sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+* vim /etc/yum.repos.d/kubernetes.repo
+------------------------------------
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+		
+		
+* yum install kubelet
+* yum install kubeadm
+* free -h
+[
+- cat /etc/sysctl.conf:
+  net.bridge.bridge-nf-call-ip6tables = 1
+  net.bridge.bridge-nf-call-iptables = 1
+- kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=192.168.31.175
+- kubeadm config images pull
+]
+* systemctl  restart kubelet && systemctl enable kubelet
+  - Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service to /etc/systemd/system/kubelet.service.
+  - Thorws error related to fstab.
+* modprobe br_netfilter
+* echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+* swapoff -a
+* vim /etc/fstab
+* Comment the "swap" line
+* reboot
+* systemctl  restart kubelet && systemctl enable kubelet
+* kubeadm init
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Your Kubernetes master has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  1.mkdir -p $HOME/.kube
+  2.sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  3.sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of machines by running the following on each node as root:
+  kubeadm join 192.168.31.175:6443 --token w2bfiv.exen5vfn9nxzxdgi --discovery-token-ca-cert-hash sha256:c557ed267ceb8d8b9cbabea5c809622e162a2053c7d6bff0800947c40a946582
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  
+
+// So, after we run commands 1, 2 and 3, we need to bring up the dash board and setting up the pod network.
+   So, we have to setup a Calico pod and then dash board. We must start the dash board first and then add nodes.
+
+// For creating a POD based on Calico
+*  kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+   It will copy the template of calico.yml from above link, So, calico controller is created
+*  kubectl get pods --all-namespaces -o wide
+NAMESPACE     NAME                                         READY     STATUS    RESTARTS   AGE       IP               NODE
+kube-system   calico-etcd-bc2r8                            1/1       Running   0          4m        192.168.31.175   master.example.com
+kube-system   calico-kube-controllers-cd589c58b-gbdjn      0/1       Pending   0          4m        <none>           <none>
+kube-system   calico-node-54nx6                            0/2       Evicted   0          4m        <none>           master.example.com
+kube-system   coredns-78fcdf6894-f578j                     0/1       Pending   0          6m        <none>           <none>
+kube-system   coredns-78fcdf6894-sdtm7                     0/1       Pending   0          6m        <none>           <none>
+kube-system   etcd-master.example.com                      1/1       Running   0          6m        192.168.31.175   master.example.com
+kube-system   kube-apiserver-master.example.com            1/1       Running   0          5m        192.168.31.175   master.example.com
+kube-system   kube-controller-manager-master.example.com   0/1       Evicted   0          6m        <none>           master.example.com
+kube-system   kube-proxy-xqvlb                             1/1       Running   0          6m        192.168.31.175   master.example.com
+kube-system   kube-scheduler-master.example.com            1/1       Running   0          5m        192.168.31.175   master.example.com
+*  kubectl get nodes
+NAME                 STATUS    ROLES     AGE       VERSION
+master.example.com   Ready     master    7m        v1.11.1
+
+// For creating the dashboard first - bring this up in the master machine before starting Nodes.
+*  kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+   So, kubernetes dashboard has been created
+
+// To enable proxy and continues with new terminal window. It will give the port number on which dashboard is being served.
+*  kubectl proxy 			=> Starting to serve on 127.0.0.1:8001
+   Come to browser and type "localhost:8001" and the screen will open. But in raw mode, so we need to activate service account.
+
+   
