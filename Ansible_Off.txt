@@ -1,0 +1,69 @@
+* All YAML files (regardless of their association with Ansible or not) can optionally begin with "---" and end with "..."
+* All members of a list are lines beginning at the same indentation level starting with a "- " (a dash and a space):
+---
+- hosts: webservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+    notify:
+    - restart apache
+  - name: ensure apache is running (and enable it at boot)
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+  handlers:
+    - name: restart apache
+      service:
+        name: httpd
+        state: restarted
+----------------------------------------------------------------------------------------------------------------------------
+---
+- hosts: webservers
+  remote_user: root
+
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+
+- hosts: databases
+  remote_user: root
+
+  tasks:
+  - name: ensure postgresql is at the latest version
+    yum:
+      name: postgresql
+      state: latest
+  - name: ensure that postgresql is started
+    service:
+      name: postgresql
+      state: started
+
+
+* Service module uses "key=value" form.
+* Command or shell module do not use "Key=value" form.
+  It cares abot return codes. 
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+

@@ -1,0 +1,611 @@
+**************************************************************************************************************************
+https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html		---- Lifecycles, phases and goals
+https://www.surasint.com/maven-life-cycle-phase-and-goal-easy-explained/			---- Lifecycles, phases and goals
+https://maven.apache.org/pom.html													---- All attributes of POM
+https://maven.apache.org/guides/introduction/introduction-to-the-pom.html 			---- Inheritance of POM
+https://howtodoinjava.com/maven/maven-parent-child-pom-example/						---- Inheritance of POM
+https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html  ---- Dependency Mechanism/ scope
+https://www.mkyong.com/maven/how-to-add-remote-repository-in-maven-pom-xml/			---- repositories
+https://maven.apache.org/guides/mini/guide-multiple-repositories.html				---- repositories
+https://blog.packagecloud.io/eng/2017/03/09/how-does-a-maven-repository-work/		---- repositories
+https://www.javatpoint.com/maven-repository											---- repositories
+https://www.javatpoint.com/maven-plugin												---- Plugins
+https://maven.apache.org/guides/mini/guide-configuring-plugins.html					---- Plugins
+https://maven.apache.org/guides/introduction/introduction-to-profiles.html			---- Introduction to Build Profiles
+https://stackoverflow.com/questions/5901378/what-exactly-is-a-maven-snapshot-and-why-do-we-need-it ---- snapshots
+https://www.javatpoint.com/maven-web-application									---- Maven Web Application
+
+**************************************************************************************************************************
+
+
+Maven with Eclipse :
+
+* Download the java app from https://github.com/in28minutes/MavenIn28Minutes.
+* In first project, we culd see 3 different files : 
+  - App.java : Java basic program, 
+  - AppTest.java : Contains JUnit test for unit testing
+  - pom.xml : pom file
+
+* Now, we want to create spring.JAR file that contains this particular application and can be given to other developers.
+  If anyone wants to use this project into their project, this JAR can be used. 
+
+* Process to create a spring.JAR :
+  - Compile app.java to convert it into app.class
+  - Compile apptest.java to convert it into apptest.class
+    (To compile a particular class that has dependencies ( Lets say apptest.java uses Junit framework, so we need to make junit framework available in the class path )
+    If Junit framework is unavailable in the class path, then error comes like 'class not found')
+  -  Run the unit test
+  - Combine all class files into one archieve and create this Spring.JAR
+
+
+* Convention of Maven (can be overridden):
+  - Source files should be in src/main/java
+  - Test   files should be in src/test/java
+  - pom.xml (project object model) should be in 'src' ( root directory)
+  - Delete App.java and AppTest.java can be deleted from 'src' ( root directory)
+
+* Now 'cd' to that root of the folder.
+* Check of Version :
+  - Type 'java -version'
+  - Type 'mvn --version' - Any version above 3.0 is good.
+
+* Compile :
+  - Type 'mvn compile' - It will compile app.java and we could see a new folder created in 'src' ( root directory) with name 'target'
+    'target' will have 2 folders, one is 'classes' folder (which will have 'App.class' file) and ther one 'maven-status' folder. 
+  - Type 'mvn test-compile' - Now, we could see a new folder created in 'src/target' ( root directory) with name 'test-classes' and it contains 'AppTest.class'
+
+Even tough, we just ran 'mvn test-compile', it will run 'mvn compile'
+'mvn clean' will remove everything from 'target' folder.
+
+* Type 'mvn test' - It is used to run JUnit test files. (Before running it, we need to compile src file then test file)
+
+* Phases in Maven :
+  - Validate
+  - Compile
+  - Test
+  - Package
+  - Integration Test
+  - Verify
+  - Install
+  - Deploy 
+  If any command is run, it will do all previous steps too.
+
+* Type 'mvn install' and it will run compile, test-compile, test,  package (where, it creates a JAR and installed it to out local repository),
+  install (It will copy the created JAR to local Maven repository - Like a folder where Maven temporarily stores the files)
+
+* Now, if we will see the 'target' folder, it will show 'classes', 'maven-archiever', 'maven-status', 'surefire-reports', 'test-classes' and 'basic-maven..' JAR
+  In 'basic-maven..' JAR, we could see 'App.class' and a folder 'META-INF'. This JAR can be shared to other users who wants to use our application.
+  Surefire-reports folder has "AppTest.txt" and "TEST-AppTest.xml". "AppTest.txt" contains result of previous run.
+
+* In Eclipse, create a workspace which will store all eclipse files. Just open eclipse and it will ask for new workspace. Give a proper name for the folder.
+
+* Import the project that we have already created.
+  - Go to 'File' tab and click 'Import', type 'maven' in search filed in new popped up screen and select 'Existing Maven Projects' and click 'Next'.
+  - A new window opened where we need to give the root directory of our project where we have extracted the project and it will show a 'pom.xml' file.
+  - Click on 'Finish' button.
+  With Eclipse, we can import maven projects.
+
+* Once the project gets imported into Eclipse, we could see the folder structure like below :
+  basic-maven-example -->
+	- src/main/java --> (default package) --> App.java --> App
+	- src/test/java --> (default package) --> AppTest.java
+	- Maven Dependencies --> junit-4.1jar
+	- target --> pom.xml
+
+
+**************************************************************************************************************************
+
+POM (Project Object Model) :
+----------------------------
+* Name
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.in28minnutes.maven</groupId>
+  <artifactId>basic-maven-example</artifactId>
+
+* Version
+  <version>1.0-SNAPSHOT</version>  
+
+* Packaging
+  <packaging>jar</packaging>
+
+* Dependencies
+  <dependencies>
+      <dependency>
+	  <groupId>junit</groupId>
+	  <artifactId>junit</artifactId>
+	  <version>4.1</version>  
+  	  <scoope>test</scope>  
+      </dependency>
+  </dependencies>
+
+NOTE : Maven repositories stores all versins of all dependencies. So, when we define a dependency, Maven goes to Maven repositories and make it available to project.
+       If, we change "<version>4.1</version>" to "<version>4.2</version>" in POM file then,
+       "Maven Dependencies" folder in Eclipse, that was containing "junit-4.1jar" will get changed to "junit-4.2jar".
+
+* Plugins
+
+**************************************************************************************************************************
+**************************************************************************************************************************
+**************************************************************************************************************************
+
+Maven comes with 3 built-in build life cycles as shown below/ Build Lifecycle Basics :
+--------------------------------------------------------------------------------------
+* Clean - This phase involves cleaning of the project (for a fresh build & deployment) and is defined directly with its plugin bindings.
+  <phases>
+    <phase>pre-clean</phase>		- execute processes needed prior to the actual project cleaning
+    <phase>clean</phase>			- remove all files generated by the previous build
+    <phase>post-clean</phase>		- execute processes needed to finalize the project cleaning
+  </phases>
+  <default-phases>
+    <clean>
+      org.apache.maven.plugins:maven-clean-plugin:2.5:clean
+    </clean>
+  </default-phases>
+
+
+* Default - This phase handles the complete deployment of the project and is defined without any associated plugin. 
+	    Plugin bindings for this lifecycle are defined separately for every packaging:
+<phases>
+  <phase>validate</phase>			 - validate the project is correct and all necessary information is available.
+  <phase>initialize</phase>		 	 - initialize build state, e.g. set properties or create directories.
+  <phase>generate-sources</phase>	 - generate any source code for inclusion in compilation.
+  <phase>process-sources</phase>	 - process the source code, for example to filter any values.
+  <phase>generate-resources</phase>	 - generate resources for inclusion in the package.
+  <phase>process-resources</phase>	 - copy and process the resources into the destination directory, ready for packaging.
+  <phase>compile</phase>		 	 - compile the source code of the project.
+  <phase>process-classes</phase>	 - post-process the generated files from compilation, for example to do bytecode enhancement on Java classes.
+  <phase>generate-test-sources</phase>	 - generate any test source code for inclusion in compilation.
+  <phase>process-test-sources</phase>	 - process the test source code, for example to filter any values.
+  <phase>generate-test-resources</phase> - create resources for testing.
+  <phase>process-test-resources</phase>	 - copy and process the resources into the test destination directory.
+  <phase>test-compile</phase>		 - compile the test source code into the test destination directory
+  <phase>process-test-classes</phase>	 - post-process the generated files from test compilation. Ex : To do bytecode enhancement on Java classes. 
+										   Maven 2.0.5 and above.
+  <phase>test</phase>			 	 - run tests using a suitable unit testing framework. These tests should not require the code be packaged or deployed.
+	<phase>prepare-package</phase>	 - perform any operations required to prepare a package before actual packaging. Often results in an unpacked, 
+									   processed version of the package. 
+  <phase>package</phase>		 	 - take the compiled code and package it in its distributable format, such as a JAR.
+  <phase>pre-integration-test</phase>	 - perform actions required before integration tests are executed. 
+										   It may involve things such as setting up the required environment.
+  <phase>integration-test</phase>	 - process and deploy the package if necessary into an environment where integration tests can be run.
+  <phase>post-integration-test</phase>	 - perform actions required after integration tests have been executed. This may including cleaning up the environment.
+  <phase>verify</phase>			 	 - run any checks to verify the package is valid and meets quality criteria.
+  <phase>install</phase>		 	 - install the package into the local repository, for use as a dependency in other projects locally.
+  <phase>deploy</phase>			 	 - done in an integration/release env., copies the final package to remote repository for sharing with other developers & projects.
+</phases>
+
+
+* Site - This phase handles the generating the java documentation of the project and is defined directly with its plugin bindings.
+<phases>
+  <phase>pre-site</phase>		- execute processes needed prior to the actual project site generation
+  <phase>site</phase>			- generate the project's site documentation
+  <phase>post-site</phase>		- execute processes needed to finalize the site generation, and to prepare for site deployment
+  <phase>site-deploy</phase>	- deploy the generated site documentation to the specified web server
+</phases>
+<default-phases>
+  <site>
+    org.apache.maven.plugins:maven-site-plugin:3.3:site
+  </site>
+  <site-deploy>
+    org.apache.maven.plugins:maven-site-plugin:3.3:deploy
+  </site-deploy>
+</default-phases>
+
+
+
+A Build Lifecycle is Made Up of Phases :
+----------------------------------------
+Each of these build-lifecycles is defined by a different list of build phases, wherein a build-phase represents a stage in the lifecycle.
+For example, the default-lifecycle comprises of the following phases (for a complete list of the lifecycle-phases, refer to the Lifecycle Reference):
+Above are the details of build-phases in various life-cycles.
+
+
+A Build Phase is Made Up of Plugin Goals :
+------------------------------------------
+However, even though a build-phase is responsible for a specific step in the build-lifecycle, the manner in which it carries out those responsibilities may vary. 
+And this is done by declaring the plugin goals bound to those build phases.
+A plugin goal represents a specific task (finer than a build phase) which contributes to the building and managing of a project. 
+It may be bound to zero or more build phases. 
+
+A goal not bound to any build phase could be executed outside of the build lifecycle by direct invocation. 
+The order of execution depends on the order in which the goal(s) and the build phase(s) are invoked. For example, consider the command below. 
+The clean and package arguments are build phases, while the dependency:copy-dependencies is a goal (of a plugin).
+
+"mvn clean dependency:copy-dependencies package" 
+If this were to be executed, the clean phase will be executed first (it will run all preceding phases of the clean lifecycle, plus the clean phase itself) 
+and then the "dependency:copy-dependencies" goal, before finally executing the package phase (and all its preceding build phases of the default lifecycle).
+
+Moreover, if a goal is bound to one or more build phases, that goal will be called in all those phases.
+
+Furthermore, a build phase can also have zero or more goals bound to it. 
+If a build phase has no goals bound to it, that build phase will not execute. But if it has one or more goals bound to it, it will execute all those goals
+
+(Note: In Maven 2.0.5 and above, multiple goals bound to a phase are executed in the same order as they are declared in the POM, 
+       But, multiple instances of the same plugin are not supported. Multiple instances of the same plugin are grouped to execute together & ordered in 
+	   Maven 2.0.11 & above).
+
+**************************************************************************************************************************
+
+Dependency Mechanism :
+----------------------
+Dependency scope is used to limit the transitivity of a dependency, and also to affect the classpath used for various build tasks.
+There are 6 scopes available:
+
+* compile  - This is the default scope, used if none is specified. Compile dependencies are available in all classpaths of a project. 
+			 Furthermore, those dependencies are propagated to dependent projects.
+* provided - This is much like compile, but indicates you expect the JDK or a container to provide the dependency at runtime. 
+			 For example, when building a web application for the Java 
+
+Enterprise Edition, you would set the dependency on the Servlet API and related Java EE APIs to scope provided because the web container provides those classes. 
+This scope is only available on the compilation and test classpath, and is not transitive.
+* runtime - This scope indicates that the dependency is not required for compilation, but is for execution. 
+			It is in the runtime and test classpaths, but not the compile classpath.
+* test	  - This scope indicates that the dependency is not required for normal use of the application, and is only available for the test compilation 
+			and execution phases. This scope is not transitive.
+* system  - This scope is similar to provided except that you have to provide the JAR which contains it explicitly. 
+			The artifact is always available and is not looked up in a repository.
+* import  - This scope is only supported on a dependency of type pom in the <dependencyManagement> section. 
+			It indicates the dependency to be replaced with the effective list of dependencies in the specified POM's <dependencyManagement> section. 
+			Since they are replaced, dependencies with a scope of import do not actually participate in limiting the transitivity of a dependency.
+			(only available in Maven 2.0.9 or later)
+
+
+More relation in Maven_Dependency_Mechanism excel sheet :
+----------------------------------------------------------
+When maven is run on project B, version 1.0 of artifacts a, b, c, and d will be used regardless of the version specified in their pom.
+a and c both are declared as dependencies of the project. So version 1.0 is used due to dependency mediation. 
+Both will also have runtime scope as it is directly specified.
+b is defined in B's parent's dependency management section and since dependency management takes precedence over dependency mediation for 
+transitive dependencies, version 1.0 will be selected should it be referenced in a or c's pom. b will also have compile scope.
+Finally, since d is specified in B's dependency management section, should d be a dependency (or transitive dependency) of a or c, 
+version 1.0 will be chosen - again because dependency management takes precedence over dependency mediation and also because the current pom's 
+declaration takes precedence over its parent's declaration.
+
+**************************************************************************************************************************
+
+POM Attributes :
+----------------
+<project>
+  <modelVersion>
+  <groupId>
+  <artifactId>
+  <packaging>
+  <repositories>
+  <repository>
+  <url>
+  <snapshots>
+    <layout>	
+  <pluginRepositories>
+    <pluginRepository>
+  <build>
+
+
+<modules>
+<exclusions>
+<dependency>
+<relativePath>
+<parent>
+
+
+<build>
+  <plugins>
+    <plugin>
+      <executions>
+        <execution>
+          <id> </id>
+          <phase>
+          <goals>
+	    <goal> </goal>
+          <configuration>
+            <tasks>
+              <echo>
+              </echo>
+            </tasks>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+
+**************************************************************************************************************************
+
+Exclusions Mechanism :
+----------------------
+
+Normal exclusions Mechanism :
+-----------------------------
+<dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-embedder</artifactId>
+      <version>2.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+</project>
+
+
+Wildcard excludes makes it easy to exclude all a dependency's transitive dependencies. :
+----------------------------------------------------------------------------------------
+It is also sometimes useful to clip a dependency's transitive dependencies. A dependency may have incorrectly specified scopes, or dependencies that conflict 
+with other dependencies in your project. Using wildcard excludes makes it easy to exclude all a dependency's transitive dependencies. 
+In the case below you may be working with the maven-embedder and you want to manage the dependencies you use yourself, so you clip all the transitive dependencies:
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-embedder</artifactId>
+      <version>3.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+</project>
+
+**************************************************************************************************************************
+
+Inheritance Mechanism :
+---------------------
+com.mycompany.app:my-app:1's POM
+--------------------------------
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.mycompany.app</groupId>
+  <artifactId>my-app</artifactId>
+  <version>1</version>
+  <packaging>pom</packaging>
+ 
+  <modules>
+    <module>../my-module</module>
+  </modules>
+</project>
+
+
+com.mycompany.app:my-module:1's POM
+--------------------------------
+<project>
+  <parent>
+    <groupId>com.mycompany.app</groupId>
+    <artifactId>my-app</artifactId>
+    <version>1</version>
+    <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>my-module</artifactId>
+</project>
+
+
+[NOTE] : Elements which are not inherited include artifactId, name and prerequisites
+
+**************************************************************************************************************************
+
+Repository Mechanism :
+---------------------
+A maven repository is a directory of packaged JAR file with pom.xml file. Maven searches for dependencies in the repositories. 
+There are 3 types of maven repository:
+Local Repository
+Central Repository
+Remote Repository
+
+Maven searches for the dependencies in the following order: Local repository then Central repository and then Remote repository.
+1) Maven Local Repository : It is located in your local system. It is created by the maven when you run any maven command.
+   By default, maven local repository is %USER_HOME%/.m2 directory. For example: C:\Users\SSS IT\.m2.
+
+   We can change the location of maven local repository by changing the settings.xml file. 
+   It is located in MAVEN_HOME/conf/settings.xml, for example: E:\apache-maven-3.1.1\conf\settings.xml. Let's see the default code of settings.xml file :
+
+   settings.xml
+   ------------
+   ...  
+   <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"   
+     ...
+     <!-- localRepository  
+      | The path to the local repository maven will use to store artifacts.  
+      |  
+      | Default: ${user.home}/.m2/repository  
+     <localRepository>/path/to/local/repo</localRepository>  
+     -->  
+  
+   ...  
+   </settings>  
+
+Now change the path to local repository. After changing the path of local repository, it will look like this:
+
+   settings.xml
+   ------------
+   ...  
+   <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"   
+     ...
+      <localRepository>e:/mavenlocalrepository</localRepository>  
+       
+   ...  
+   </settings>  
+   As you can see, now the path of local repository is e:/mavenlocalrepository.
+
+
+2) Maven Central Repository : It is located on the web. It has been created by the apache maven community itself.
+   The path of central repository is: http://repo1.maven.org/maven2/.
+   The central repository contains a lot of common libraries that can be viewed by this url http://search.maven.org/#browse.
+
+3) Maven Remote Repository : It is located on the web. 
+   Most of libraries can be missing from the central repository such as JBoss library etc, so we need to define remote repository in pom.xml file.
+
+**************************************************************************************************************************
+
+Snapshot Mechanism :
+--------------------
+<repository>
+  <id>foo-repository</id>
+  <url>...</url>
+  <snapshots>
+    <enabled>true</enabled>    -- "true", Maven looks for updates for this repository & when "false", the repository here is stable & there's no need of updates
+    <updatePolicy>XXX</updatePolicy> -- an interval in minutes (XXX)
+  </snapshots>
+</repository>
+
+**************************************************************************************************************************
+
+Plugins Mechanism :
+-------------------
+Plugins are central part of maven framework and is used to perform specific goal. According to Apache Maven, there are 2 types of maven plugins.
+
+* Build Plugins	   -- These plugins are executed at the time of build and should be declared inside the <build> element.
+* Reporting Plugin -- These plugins are executed at the time of site generation and should be declared inside the <reporting> element.
+
+All plugins should have minimal required informations: groupId, artifactId and version.
+It is recommended to define each version of the plugins, used by the build to guarantee the build reproducibility. 
+Always better to specify them in the <build><pluginManagement/></build> elements for each build plugins (generally, you define a <pluginManagement/> element 
+in a parent POM). For reporting plugins, you should specify each version in the <reporting><plugins/></reporting> elements 
+(and surely in the <build><pluginManagement/></build> elements too).
+
+Maven Core Plugins :
+A list of maven core plugins are given below:
+Plugin		-	Description
+---------------------------------------------------------------------------------------------------------
+clean		-	clean up after build.
+compiler	-	compiles java source code.
+deploy		-	deploys the artifact to the remote repository.
+failsafe	-	runs the JUnit integration tests in an isolated classloader.
+install		-	installs the built artifact into the local repository.
+resources	-	copies the resources to the output directory for including in the JAR.
+site		-	generates a site for the current project.
+surefire	-	runs the JUnit unit tests in an isolated classloader.
+verifier	-	verifies the existence of certain conditions. It is useful for integration tests.
+
+
+"Configuring" under "Plugin" example1 :
+---------------------------------------
+Maven plugins (build and reporting) are configured by specifying a <configuration> element, where the child elements of the <configuration> element are 
+mapped to fields, or setters, inside your Mojo (remember that a plug-in consists of one or more Mojos where a Mojo maps to a goal). 
+Example, if we had a Mojo that performed a query against a particular URL, with a specified timeout and list of options. The Mojo might look like the following:
+
+/**
+ * @goal query
+ */
+public class MyQueryMojo
+    extends AbstractMojo
+{
+    /**
+     * @parameter expression="${query.url}"
+     */
+    private String url;			----------------------------> "url" will be mapped to "url" mentioned in pom.xml
+ 
+    /**
+     * @parameter default-value="60"
+     */
+    private int timeout;		----------------------------> "timeout" will be mapped to "timeout" mentioned in pom.xml
+ 
+    /**
+     * @parameter
+     */
+    private String[] options;	----------------------------> "options" will be mapped to "options" mentioned in pom.xml
+ 
+    public void execute()
+        throws MojoExecutionException
+    {
+        ...
+    }
+}
+
+To configure the Mojo from your POM with the desired URL, timeout and options you might have something like the following:
+<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-myquery-plugin</artifactId>
+        <version>1.0</version>
+        <configuration>
+          <url>http://www.foobar.com/query</url>	------------> "url"     has been already mapped to the "url"     mentioned in the Mojo
+          <timeout>10</timeout>				------------> "timeout" has been already mapped to the "timeout" mentioned in the Mojo
+          <options>					------------> "options" has been already mapped to the "options" mentioned in the Mojo
+            <option>one</option>
+            <option>two</option>
+            <option>three</option>
+          </options>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  ...
+</project>
+
+
+mvn myquery:query -Dquery.url=http://maven.apache.org
+
+
+"Configuring" under "Plugin" example2 :
+---------------------------------------
+...
+<configuration>
+  <myString>a string</myString>
+  <myBoolean>true</myBoolean>
+  <myInteger>10</myInteger>
+  <myDouble>1.0</myDouble>
+  <myFile>c:\temp</myFile>
+  <myURL>http://maven.apache.org</myURL>
+</configuration>
+...
+
+
+"Configuring" under "Plugin" example3 :
+---------------------------------------
+...
+<configuration>
+  <person>
+    <firstName>Jason</firstName>
+    <lastName>van Zyl</lastName>
+  </person>
+</configuration>
+...
+
+
+The rules for mapping complex objects are as follows:
+-----------------------------------------------------
+* There must be a private field that corresponds to name of the element being mapped. So in our case the person element must map to a person field in the mojo.
+
+* The object instantiated must be in the same package as the Mojo itself. 
+  So if your mojo is in com.mycompany.mojo.query then the mapping mechanism will look in that package for an object named Person. 
+  As you can see the mechanism will capitalize the first letter of the element name and use that to search for the object to instantiate.
+
+* If you have the object to be instantiated live in a different package or have a more complicated name, then you must specify this using an implementation 
+  attribute. Ex : 
+...
+<configuration>
+  <person implementation="com.mycompany.mojo.query.SuperPerson">
+    <firstName>Jason</firstName>
+    <lastName>van Zyl</lastName>
+  </person>
+</configuration>
+...
+
+
+Things to look for :
+* Mapping Collections
+* Configuring Build Plugins - using the <executions> Tag
+			    - using the <dependencies> Tag
+			    - using the <inherited> Tag
+
+* Configuring Reporting Plugins - Using the <reporting> Tag VS <build> Tag
+				- Using the <reportSets> Tag
+				- Using the <inherited> Tag 
+**************************************************************************************************************************

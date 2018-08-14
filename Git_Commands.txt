@@ -1,0 +1,288 @@
+After Installation og Git, first time :
+--------------------------------
+* git config --global user.name "Aditya Barnwal"
+* git config --global user.email barnwal3105@gmail.com
+* git config --global -l
+  o/p :user.name=Aditya Barnwal
+       user.email=barnwal3105@gmail.com
+       gui.recentrepo=E:/Git_GitUI
+----------------------------------------------------------------------------------------------------------------------------------------------
+* clear				- for cleaning screen
+* ls				- for listing out all members present in that branch
+* vim file2.txt			- for creating/ updating file directly in git bash and then Esc and then twice "Shift + Z"
+* whoami
+
+* git init			- for initialising local repository
+* git status			- for knowning the status of local repository
+* git add file1.txt		- for adding one file to local repository
+* git add -A			- for adding all files to local repository
+* git rm -r file1.txt		- for deleting the file from git bash, file must be added in index before deletion (to be committed is not required)
+* git rm -f file1.txt		- for deleting the file from git bash forcefully
+* git commit -m "comment"	- for commiting 1 file change
+* git commit -a -m "comment"	- for commiting all files changes which has already been added to index
+* cat file1.txt			- for displaying the content of file1
+* git log 			- for displaying hexcodes of all previous commits in that branch (press 'q' to end the log session, else no key will work)
+* git log --oneline		- for displaying hexcodes of all previous commits in that branch in one line.
+* git remote add origin "link of your central repository" - URL from GitHub ---- "https://github.com/AdityaBarnwal/First_One.git"
+* git remote show origin	- to show the central repository address form where pull-push happens
+* git pull origin master	- pull from central repository
+* git pull origin master --allow-unrelated-histories 	  - Force Pull
+* git push origin master	- push to central repository
+* git branch 			- know all branch in the current checked out branch
+* git branch branch1		- for creating a new branch (branch1) from master branch
+* git checkout branch1		- for checking in master/ new branch (branch1)
+* git checkout -b branch_name   - create the branch and checkout that (git branch branch1 + git checkout branch1)
+* git branch -d branch_name	- deletes branch if it has been fully merged
+* git branch -D branch_name	- deletes branch irrespective of its merged status
+* git pull origin master	- for pulling all files/ changed files from central to local repository
+* git merge branch1		- for merging branch1 to master branch, checkout the master branch and then perform merge of branch1.
+* git rebase master		- for merging master to branch1, checkout the branch1 and then perform rebase of master. (HEAD will be on branch1)
+* git rebase branch1		- for merging branch1 to master, checkout the master and then perform rebase of branch1. (HEAD will be on master)
+
+* git stash 			- it will stash the current work and will refer to last commit done.
+* git stash save "comment"	- it will stash the current work with a comment and will refer to last commit done.
+* git stash list 		- it will show the list of stash with most recent one at the top
+* git stash apply stash@{2}	- it will apply the stash@{2}, but will not delete the stash@{2} from stash list
+* git stash pop			- it will apply the latest stash done, that is stash@{2} and will delete the stash@{0} from stash list
+* git stash drop stash@{1}	- it will drop the stash from the stash list without implementing it.
+* git stash clear		- it will drop all stash from the stash list without implementing them.
+
+
+  
+* git chechout C4		- moves the HEAD to C4 (commit_id)
+* git chechout branch_name	- moves the HEAD to branch_name and places the HEAD to the latest commit
+* git chechout HEAD^		- moves the HEAD to one-commit-early stage
+* git chechout HEAD~4		- moves the HEAD to four-commit-early stage
+* git branch -f master HEAD~3	- 
+* git reset HEAD~		- rollback local repository and its index (If C3 is the latest version.. git reset  HEAD~ will rollback to C2)
+* git revert HEAD~		- rollback remote repository (If C3 is the latest version.. git revert HEAD~ will create C3' below C3 with reference of C2)
+* git cherry-pick C2 C4 	- 
+* git rebase -i HEAD~4 		- allows to reorder Commits/ select-ignore commits/ squash commits from four-commit-early stage
+				  can perform three functions from this interactive rebase. ( Reorder Commits, select/ignore commits and squash commits )
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Clearing logs from local/ Central repository :
+----------------------------------------------
+* rm -rf .git			- recreate the repos from the current content only,clear all previous data and logs
+				- git init, git add,git commit -m "Initial commit"
+
+* Clearing logs from central repository :
+  git checkout --orphan TEMP_BRANCH ----   # Check out to a temporary branch:
+  git add -A			    	    ----   # Add all the files
+  git commit -am "Initial commit"   ----   # Commit the changes 
+  git branch -D master		    	----   # Delete the old branch
+  git branch -m master		    	----   # Rename the temporary branch to master
+  git push -f origin master	    	----   # Finally, force update to our repository
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Git push :
+----------
+* ssh-keygen -> Y 			-> will generate SSH key and will saved in "your public key has been saved in /c/Users/reshma/.ssh/id_rsa.pub."
+							-> copy the address from displayed address "/c/Users/reshma/.ssh/id_rsa.pub"
+* cat /c/Users/reshma/.ssh/id_rsa.pub - will generate public ssh key, copy the entire 4-5 lines.
+							-> go to GitHub account -> click "settings" -> click "SSH and GPG keys" -> click "New SSH key"
+							-> Provide title and paste entire 4-5 lines copied earlier -> click "Add SSH key" 
+* ssh -T git@github.com		-> "HI ****! You've successfully authenticated...."
+* git push origin branch1	-> checkout in branch1, type this command -> will push branch1 in central repository (GitHub)
+* git push origin master	->  checkout in branch1
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Revert back to just previous version :
+--------------------------------------
+* create a file in local repository in folder "revert.txt".
+* Add and commit this file.
+* modify this file in folder.
+* commit again for this file.
+* git log 
+* copy the first 8 hexadecimal digits (second one for reverting to previous version, first one will be for the latest modified one)
+* git checkout 8-digit_hexadecimal_code revert.txt	-> (through master branch)
+
+----------------------------------------------------------------------------------------------------------------------------------------------          
+
+
+* if we change any file (that already has been commited in git) in local repository, then we have to perform commit to that change, to update them in the index.
+  git commit -a -m "comment"
+
+* git pull = git fetch + git merge
+  git pull  wil pull all changes from master branch and will apply to local repository.
+  git fetch wil pull all changes from master branch and will store them in another chain, git merge is required again to apply the changes to local repository.
+
+* Rebasing - Instead of doing similar commit which will have 2 parent commit, rebasing actually places the entire commit history of your branch on tip of master branch.
+  Benifit - much cleaner project history, linear workflow and it reduces the number of branches.
+
+----------------------------------------------------------------------------------------------------------------------------------------------          
+Merge issue :
+Installation mergetool :
+* git mergetool --tool-help
+* git mergetool --tool=vimdiff
+-------------------------------
+* git pull --rebase origin master 	-> 
+* git mergetool --- make desired changes -> ":wq" to save and exit for all 3 files
+* git rebase --continue
+
+----------------------------------------------------------------------------------------------------------------------------------------------          
+
+New Ones : 
+* git branch --merged - lists the branches that have been merged into the current branch
+* git branch --no-merged branch_name - lists the branches that have not been merged into the current branch
+* git branch -d[head] 
+* git diff <commit-id1> <commit-id2> <file_list>
+* difference between ‘git remote’ and ‘git clone’ - ‘git remote add’ creates an entry in git config that specifies a name for a particular URL.  
+						    ‘git clone’ creates a new git repository by copying and existing one located at the URI.
+
+
+Q. How do you find a list of files that has changed in a particular commit?
+A. For this answer instead of just telling the command, explain what exactly this command will do.
+   To get a list files that has changed in a particular commit use the below command: git diff-tree -r {hash}
+
+   Given the commit hash, this will list all the files that were changed or added in that commit. 
+   The -r flag makes the command list individual files, rather than collapsing them into root directory names only. 
+   You can also include the below mentioned point, although it is totally optional but will help in impressing the interviewer.
+   The output will also include some extra information, which can be easily suppressed by including two flags:  git diff-tree –no-commit-id –name-only -r {hash}
+   Here –no-commit-id will suppress the commit hashes from appearing in the output, and –name-only will only print the file names, instead of their paths.
+
+Q. How do you squash last N commits into a single commit?
+A. There are two options to squash last N commits into a single commit.
+   - If you want to write the new commit message from scratch use the following command
+     git reset –soft HEAD~N &&
+     git commit
+   - If you want to start editing the new commit message with a concatenation of the existing commit messages then you need to extract those messages and 
+     pass them to Git commit for that I will use
+     git reset –soft HEAD~N &&
+     git commit –edit -m”$(git log –format=%B –reverse .HEAD@{N})”
+
+Q. What is Git bisect? How can you use it to determine the source of a (regression) bug?
+A. I will suggest you to first give a small definition of Git bisect.
+   Git bisect is used to find the commit that introduced a bug by using binary search. Command for Git bisect is : git bisect <subcommand> <options>
+
+   Now since you have mentioned the command above explain them what this command will do.
+
+   This command uses a binary search algorithm to find which commit in your project’s history introduced a bug. 
+   You use it by first telling it a “bad” commit that is known to contain the bug, and a “good” commit that is known to be before the bug was introduced. 
+   Then Git bisect picks a commit between those two endpoints and asks you whether the selected commit is “good” or “bad”. 
+   It continues narrowing down the range until it finds the exact commit that introduced the change.
+
+
+git concepts :
+----------------------------------------------------------------------------------------------------------------------------------------------          
+* If we just create/add a file in anny branch without commiting and swiching to other branch,, the newly created file will appear there also.
+  But, once we perform commit for that file in any one branch, the same file will go off from other branches.
+
+* If we deleted any file by "git rm fileA" and did not perform commit and then switching to some other branch then, that delete command will have no impact at all.
+  So, its important to delete and then confirm before switching to some other branch.
+
+----------------------------------------------------------------------------------------------------------------------------------------------          
+----------------------------------------------------------------------------------------------------------------------------------------------          
+* Merge :
+  Make a new branch called bugFix
+  Checkout the bugFix branch with git checkout bugFix
+  Commit once
+  Go back to master with git checkout
+  Commit another time
+  Merge the branch bugFix into master with git merge
+
+  Rebase :
+  Checkout a new branch named bugFix
+  Commit once
+  Go back to master and commit again
+  Check out bugFix again and rebase onto master
+
+
+Merge :
+filex - b1     (oldest)
+filey - master 
+filez - b1     (newest)
+
+commit 3ab4badcfe6484915ffbd0ea0d381e1b8d450b8d (HEAD -> master)
+Merge: 8704227 107793b
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Sun Apr 1 23:42:22 2018 +0530
+
+    Merge branch 'b1'
+
+commit 107793bfc953fbe0f0d9e841a6642ba1c3551bf6 (b1)
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Sun Apr 1 23:41:55 2018 +0530
+
+    adding filez
+
+commit 8704227b20fd1c9d0885d30ec92ac870074c2353
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Sun Apr 1 23:41:15 2018 +0530
+
+    adding filey
+
+commit ef048de3660857192d5274fcac64d3796d969ece
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Sun Apr 1 23:40:02 2018 +0530
+
+    adding filex
+
+=============================================================
+Rebase :
+filea - b1     (oldest)
+fileb - master 
+filec - b1     (newest)
+
+* git checkout b1 ----> git rebase master 
+
+commit 2f526749fd16a3ab5bf5ba167b72025bdf41d34b (HEAD -> b1)
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 00:50:36 2018 +0530
+
+    removed unwanted files
+
+commit 763912a7031a06763de75e65a86ac00b0206ea44
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 00:15:15 2018 +0530
+
+     adding filec
+
+commit 58b0be0b915faaed2acf9f7e8e801a8d165ea4ab
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 00:13:44 2018 +0530
+
+     adding filea
+
+commit 2ec4ee23329aa050f48e9f727bf277bd5561d1e9 (master)
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 00:14:31 2018 +0530
+
+     adding fileb
+
+=============================================================
+* git checkout master ----> git rebase b1
+
+commit c49950c3fd5553ffc3a6bbcd1a023125521cd3d7 (HEAD -> master)
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 11:29:28 2018 +0530
+
+    adding filey in master
+
+commit af05fa50e5bd9e218e0e4527883b406d4679fa24 (b1)
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 11:29:58 2018 +0530
+
+    adding filez in b1
+
+commit 13b38336f8b8f0d5c2b6f87be964cb0b188c96df
+Author: Aditya Barnwal <barnwal3105@gmail.com>
+Date:   Mon Apr 2 11:28:40 2018 +0530
+
+    adding filex in b1
+
+----------------------------------------------------------------------------------------------------------------------------------------------          
+----------------------------------------------------------------------------------------------------------------------------------------------          
+Need to Practice on :
+----------------------------------------------------------------------------------------------------------------------------------------------          
+* git diff sha1..sha2
+* git diff HEAD~1..HEAD
+* git reset --soft HEAD~
+* git clean -f (removes unadded files)
+* git reflg
+* git tag
+* git branch b1 la71541
+* .git ignore
+----------------------------------------------------------------------------------------------------------------------------------------------          
+----------------------------------------------------------------------------------------------------------------------------------------------          

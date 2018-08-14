@@ -1,0 +1,158 @@
+Installation of Ansnible :
+
+We should signed in as test user before this operation..
+--------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+* To check which relese we are using in Linux, type "cat /etc/release" or "cat /etc/redhat-release"
+  It gives o/p as "Red Hat Enterprise Linux Server release 7.4 (Maipo) "
+
+Before installing Ansible, we need to have EPEL (Extra Package repositoriy for Redhat 7) release installed on our master and node machine.
+So, Redhat 7 acts as a package repositoy and we get all kind of package from EPEL.
+To see if the repo is created or not, type "cd /etc/yum.repos.d/", if it shows 'redhat.repo', means it is created. 
+(Command prompt will be "test@ip-172-31-18-171 yum.repos.d" after typing the above command)
+
+But, we are going to create a more repo where we we get all kind of packages.
+
+Steps for downloading EPEL repository :
+---------------------------------------------
+* Before creating repo, we need to install wget. To check if wget is installed or not, type "wget"
+  If wget is not installed, we need to install it. For installing wget, type 'sudo yum install wget'
+  It may take few seconds and may ask for confirmation, so, just type 'y'
+  (If we configure EPEL, then by default we can get Ansible package)
+
+Once, wget is installed, type "[test@ip-172-31-18-171 yum.repos.d]$ wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-7.noarch.rpm"
+We may get permission denied because we are in 'etc' repos owned by root, so go to our home directory 'test' by typing 'cd ~test'
+Command prompt will become "test@ip-172-31-18-171 ~" & type "wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-7.noarch.rpm"
+							     wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+							     wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm - working
+							     wget http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+							     sudo wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm ------ fianl working
+
+Final working prm has been downloaded from http://fedoraproject.org/wiki/EPEL
+
+* Once, it is done, type "ls -l" and it will show a rpm package "epel-release-7-7.noarch.rpm".
+								"epel-release-6-8.noarch.rpm." - working
+								"epel-release-latest-7.noarch.rpm" ------ fianl working
+  So, now we need to install this package by running command "rpm -ivh epel-release-7.7.noarch.rpm"
+							     "rpm -ivh epel-release-6-8.noarch.rpm" - working
+							     "rpm -ivh epel-release-latest-7.noarch.rpm" ------ fianl working
+  For running this command we require sudo previliges, so we will type "sudo rpm -ivh epel-release-7-7.noarch.rpm"
+								       "sudo rpm -ivh epel-release-6-8.noarch.rpm" - working
+									sudo rpm -ivh epel-release-6-8.noarch.rpm
+								       "sudo rpm -ivh epel-release-latest-7.noarch.rpm" ------ fianl working
+Now, come to yum.repos.d by typing "cd /etc/yum.repos.d/" and we can see a repo with name "epel repo"created which was not there previously.
+
+
+Note: Download EPEL likewise in all machines.....
+--------------------------------------------------------------------------------------------------------------------------------
+
+Note: We need to be in test@ip*******
+Now, as we are done with the configuration with EPEL repositories, we need to update yum, before we try to install Ansible. For this, type "sudo yum update"
+Do this in all machines. (It will update plugins)
+It may notify the number of packages required for update and ask for confirmation, so type 'y'. So, they all will get updated.
+
+So, once all yum files get installed/ Updated, we need to install Ansible.
+Command to install Ansible is "sudo yum install ansible -y"
+It will force install the Ansible and will check the dependencies. Once, we install ansible package, it will install the PYTHON dependibilities.
+It proves that ansible uses python modules to install the packages.
+
+To verify if ansible is installed, type "ansible --version" that shows ansible version (2.1.0.0) {2.5.0.0 in my case} and its config file (/etc/ansible/ansible.cfg).
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+Type 'pwd' and it should show : /etc/ansible
+So, now as ansible is installed, we need to go inside most important file, anisble.cfg file by typing "more ansible.cfg" or "cat ansible.cfg"
+
+In the file, we will see following important options :
+#inventory         = /etc/ansible/hosts -- Here, we will be mentioning all our infrastructure nodes (node1, node2, etc) and we will group them in terms of categories.
+#library 	   = /usr/share/my_modules/
+#remote_temp 	   = $HOME/.ansible/tmp
+#local_temp        = $HOME/.ansible/tmp
+#forks 		   = 5			-- how much the ansible should fork if there is a no response from the client
+#poll_interval     = 15			-- check evry 15 secs for i/p and o/p from client-master nodes
+#sudo_user 	   = root		-- It will check if it needs root/ sudo previliges 
+#ask_sudo_pass 	   = True		
+#ask_pass 	   = True		
+#transport 	   = smart		
+#remote_port 	   = 22			
+#module_lang 	   = C			
+#module_set_locale = True		
+
+
+
+* Always take a backup of this file using command "sudo cp ansible.cfg  ansible.cfg.original"
+
+* "sudo vi ansible.cfg" and in "ansible.cfg" we need to change "#log_path = /var/log/ansible.log" to "log_path = /var/log/ansible.log"
+  so that we can see what is happening in the back end and we can see the log parts.
+
+* After changing the above, come out of that file and type "ansible --version" and now it will show something like :
+  log file at /var/log/ansible.log is not writeable
+  ansible 2.1.0.0
+  congig file at etc/ansible/ansible.cfg
+
+  So, make sure this log file is writeable. 
+  Type "sudo chmod 777 /var/log" to make this directory available for writing. 
+  Then, type "sudo chmod 777 /var/log/ansible.log" and then "ansible --version" and below lines appear :
+  (As of now this log file will be empty as we have just installed anisble now)
+  ansible 2.1.0.0
+  config file (/etc/ansible/ansible.cfg
+  configured module search path = Default w/o Overrides
+
+* Now, as we know that ansible is dependent on python, we will check ansible-python dependencies. 
+  In order to test the python which is involved in ansible, we will test if we have proper installed packages in al machines.
+  So, we will type : [test@ip-172-31-2-156 ansible]$ sudo yum list installed|grep -i python  (---- which will give all python packages)
+
+--------------------------------------------------------------------------------------------------------------------------------
+* So, now we need to test if python is able to run.
+  Just type "python" and it will display the python version (2.7.5) (type quit () in order to quit). This python version should be same accross all machines.
+
+  Create a python program and ru it from command "python program_name"
+  Successful run of python program means that python is working fine on our machines (Do the same in all nodes)
+--------------------------------------------------------------------------------------------------------------------------------
+
+================================================================================================================================
+* If pinging public IP is not wrking, then come to AWS account and under "Security Groups", check on your "Group Name".
+  Click on "Actions" tab and then click on "Edit inbund rules".
+  Select "All ICMP - IPv4" from "Type" column and then "Anywhere" from "Source" tab and save it.
+  Now, we will be able to ping by using public or private IP.
+
+
+* ssh-keygen -t rsa
+--------------------------------------------------------------------------------------------------------------------------------
+* E45: 'readonly' option is set (add ! to override)
+  press 'Esc' key , and then 'U' , and then type ':q' and then 'enter'
+  try opening the file with sudo privilege: sudo vi <file_name>
+================================================================================================================================
+
+* unable to ping AWS instance : https://stackoverflow.com/questions/21981796/cannot-ping-aws-ec2-instance
+* https://docs.ansible.com/ansible/2.5/user_guide/playbooks_best_practices.html
+* https://blog.toast38coza.me/custom-ansible-module-hello-world/
+* http://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module
+================================================================================================================================
+
+
+/home/test - Home directory of test when running gitbash from Downloads folder
+For uninstalling epel-release-6-8.noarch - "sudo yum remove epel-release"
+
+
+* hostname - will give the name of host or server
+* ansible all --list-hosts
+* ansible all -m ping
+* ansible -vvv all -m ping
+* ansible-playbook first.yml --syntax-check
+* ansible-playbook first.yml --list-hosts
+* ansible-playbook first.yml
+* ansible-playbook -i /root/newpath first.yml
+* ansible-doc -l | more
+* ansible-doc yum
+
+
+# uncomment this to disable SSH key host checking
+# host_key_checking = False
+to
+# uncomment this to disable SSH key host checking
+  host_key_checking = False
+
+
+
+

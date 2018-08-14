@@ -1,0 +1,263 @@
+meet_adi2008@rediffmail.com
+Adi@0311
+Adi3105
+
+* need to read AWS courses via edureka...
+
+
+
+Frameworks (Cloudhub):
+AWS
+Cloudstack
+openstack
+
+
+Setup and configuration in AWS:
+S/w packages required :
+* Amazon AWS servers (3-4 nodes of t2.micro configuration)
+* RHEL or CENTOS - release 7 to be used
+* Opensource Ansible Package from www.ansible.com
+* Multi Tab Putty Tool
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating Instances and Nodes ::
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+* Setup AWS Cloud having 3 EC-2 (Elastic Cloud Compute) servers
+  We will deploy 3 servers that will be used in our course. Once deployed,
+  we will create and exchange the user and SSH keys needed to facilitate communication during course.
+
+* go to AWS management console
+* In free tier - select region - asia pacific mumbai location.
+* Click on EC2 (Elastic compute cloud - a node in amazon web services)
+* Can see the counts of running instances,dedicated hosts, etc.. Scroll down and can see the availability of servers under "Service health"
+* Click on "Create instance" for creating a new instance
+
+
+We want 4 machines, 1 network, 1 subnet
+* Step 1 (Choose an Amazon Machine Image (AMI)) : Select Red hat enterprise Linux 7.2 and launch it
+  Virtualization : HVM (Hipervise for Amazon),,, for openstack (KVM),, for citrix (XVM)..
+
+* Step 2 (Choose an Instance Type), Chose "Current generation" from second tab. (t2 micro, variable ECUs, 1 vCPUs, 2.5 GHz, Intex Xenon Family, 
+  1 GIB (1 GB RAM), EBS(Elastic Block Storage) only).   Click on "Next: Configure Instance Details" tab
+
+* Step 3 (Configure Instance Details)
+  Number of instances : 4
+  Purchase option : nothing
+  Network : vpc-8c9776e5()172.31.0.0/16)(default)
+  Subnet  : default, it will take "No preference (default subnet in any Availability Zone)"
+  Auto-assign Public IP : Use subnet setting (Enable)
+  IAM role : nothing
+  Shutdon behavior : Stop
+  Enable termination protection : Nothing
+  Monitoring : Nothing
+  Tenancy : Shared - Run a shared hardware instance 
+            Dedicated - Run a Dedicated Instance (It will give a dedicated hardware to run our Ansible - required by companies)
+  User data : leave it blank {As text (If we want any particular thing to run once the system is started)}
+
+  Clinck on "Add Storage"
+
+* Step 4 (Add storage)
+  Volume type will be "Root", Device will be "/dev/sda1", by default all VM will have a snapshot created, Size is "10 GIB" (upto 30 GB is free, but use 10 only), 
+  Volume type "General Purpose SSD(GP2)" (Solid State Drive - Instance will reponds fast) {Magnetic type will be slow and will have lots of hardware components}
+				{Provisioned IOPS SSD(IO1) - when high performance inputs and outputs are required}
+  IOP will be "100/3000" - means 100 input outputs per second for 1 GB data transaction.
+
+  In case, we need extran volume, click on "Add New Volume"
+  Volume type will be "EBS", Device can be selected on will, snapshot created can also be selected on will, Size will be on will. 
+
+  Click on "Next : Tag Instance"
+
+* Step 5 (Tag Instance)
+  In value, tag the instance as "nodes" and then click on "Next: Configure Security Group"
+
+* Step 6 (Configure Security Group)
+  Assign a ecurity Group : "Create a new security group"
+  Security group name : my_secure_group (can be anything)
+  Description : my_secure_group (can be anything)
+  SSH (with Protocol : TCP, Port Range : 22, Source : Anywhere will be added as default and we can add our own rule by clicking on "Add rule" tab
+		Source : Custom {for giving any predefined IP}) 
+  We can use All ICMP as Type (Port Range N/A)if i want to ping any machine from anywhere (To check if Ping happening properly or not)
+  We can use HTTP     as Type (Port Range 80) as Type, if i want to ping any machine from anywhere
+  We can use HTTPS    as Type (Port Range 443)as Type, if i want to ping any machine from anywhere (any kind of web service of Apache)
+
+  Click on "Review and Launch"
+
+* Step 7 (Review Instance Launch)
+  Review all options and click on "Launch" tab
+
+* A window will open. From drop down. choose "Create a new key pair"
+  Give any Key pair name "mynodes" (can be anything) and click on "Download Key Pair" tab. (It will get downloaded in my home directory)
+  Click on "Launch Instances" tab, after few seconds a window will appear.
+
+* In the newly opened window, we can see the "View launch log", click on it and can see the status as successfull.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Creating Elastic IPs :
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+* Now click on Instances tab in Left column, after Clicking on Instances tab in \, we need to do following: 
+* All 4 machines will start getting launched, meanwhile it gets launched, we can do following things --
+* Change the names of nodes to master, node1, node2 and node3 (for ansible training make easy).
+* scrolling down, we could see the "Public IP", which would be different for every node.
+* Now, we need to assign "Elastic IPs" -- 
+  Difference between Public and Elastic IP - Public IP is dynamic in nature, the moment we reboot Node3, when new machine is launched, Public IP will change.
+  With every reboot or shut down of nodes, public IP will get changed. In order to make Public IPs constant and static, Elastic IPs are asigned.
+  How to assign Elastic IPs ?
+  - In left column, scroll down to "Network & Security" tab and click on "Elastic IPs" and click on "Allocate New Address".
+  - Similarly, allocate 4 addresses as we are using 4 nodes.
+    Here, we can see "Elastic IP", "Allocation ID", empty "Instance", empty "Private IP Address", "Scope", empty "Public DNS"
+  - After allocating addresses, select on Elastic IP and then click on "Action" drop down and select "Associate Address", it will pop up a new window.
+    - Select one Instance from drop down tab, after selecting any one, "Private IP Address" will automatically get populated.
+      Under "Instance" and check on "Reassociation", so that we don't have to create new Elastic IP everytime.
+      Fianlly, click on "Associate" button and the popup window will get closed. 
+    - Similarly, link each Node with Elastic IP.
+
+    - Now, if we click on "Network & Security" tab and click on "Elastic IPs", we can see the followings and now all have some data :
+      "Elastic IP", "Allocation ID", "Instance", "Private IP Address", "Scope", "Public DNS"
+
+* Come to Instances tab (In left column, scroll to it) and we can see Public IP and Elastic IPs will be same.
+  Each node will have a public IP address (connected with Internal IP) which will be used externally from internet.
+
+Master - Private IP address - 172.31.18.171 , elastic IP address - 52.66.70.251*, public IP address - 52.66.70.251
+Node1  - Private IP address - 172.31.18.172 , elastic IP address - 52.66.71.88* , public IP address - 52.66.71.88
+Node2  - Private IP address - 172.31.18.170 , elastic IP address - 52.66.74.112*, public IP address - 52.66.74.112
+Node3  - Private IP address - 172.31.10.10  , elastic IP address - 52.66.75.92* , public IP address - 52.66.75.92  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  Interconnecting all servers/ nodes :
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+* Select master node and click on "Connect" present on top bar. It will open a new window. Keep "A standard SSH client" as selected.
+  From example, copy the first whole line of code (this will be public IP. Ex : ssh -i "mynodes.pem" ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com)"
+* Come to putty (base machine) -------------------------------------------------------------------------------------------- It will be signed as Ex : [bash-3.2#]
+  Type "uname -a" for knowing the information about base machine.
+  go to the directory where we have downloaded the key pair (generally "Home directory"/ downloads - in mynodes.pem file)
+  ls | grep mynodes.pem --- check if mynodes.pem file is present
+  chmod 400 mynodes.pem --- change the permission of mynodes.pem
+
+  *********************************** 
+  paste the whole line of code which we cpied from example, from "ssh -i "mynodes.pem" ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com"
+  it may ask for confirmation, type "yes"
+  it will display a message like "permanently added" ---- (Now, my putty has been linked to AWS)
+  ------------------------------------------------------------------------------------- It will be signed as Ex : [ec2-user@ip-172-31-18-171~] -----> Internl IP 
+
+  Now, type "sudo su" - switching to root and keep it ready.
+  ----------------------------------------------------------------------------------------- It will be signed as Ex : [root@ip-172-31-18-171~] -----> Internl IP 
+  
+* Open as many number of tabs as number of nodes in putty and repeat above steps.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  Now, we are going to create a user called "Test" :
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+* Sign in as root --------------------------------------------------------------------------------------------as Ex : [root@ip-172-31-18-171~] -----> Internl IP 
+* Create a user "test" in master node from command "useradd test" and put the password for user test by command "passwd test" in all 4 sessions/ nodes
+  Note: We have used "sudo su" before running "useradd test".
+  add the user "test" in all nodes from command "useradd test" and set the password from command "passwd test" (all 4 sessions/ nodes, now user Test is created)
+
+  In master node, do following steps :
+* Keep signed in as root -------------------------------------------------------------------------------------as Ex : [root@ip-172-31-18-171~] -----> Internl IP 
+* check if you are in root dir. Type "pwd", o/p: /root
+* We need to make sure the password authentication and the permit root login is enabled for root before we switch to test user.
+  So, tye "cd /etc/",,, then "cd ssh",, then list our all files and directories by "ls -l"
+  here, edit sshd_config file, type "vi sshd_config" and find for "#Password Authentication yes", enable it by changing it to "Password Authentication yes"
+  find "#PermitRootLogin yes" by typing "/PermitRootLogin" and change it to "PermitRootLogin yes"
+  so, that we do not require any key and mynodes pem key is always up to connect to amazon machines.
+  
+  Do this step on all nodes/ sessions opened in putty (all 4 sessions/ nodes)
+  We can directly go to "sshd_config" file by typing "vi /etc/ssh/sshd_congif". 
+  
+* Once, done with above steps.
+  Logout from root to master prompt by typing "logout". And then logout from master by typing "logout". Means :
+  [root@ip-172-31-18-171~]    	to    [ec2-user@ip-172-31-18-171~] -----> Internl IP 
+  [ec2-user@ip-172-31-18-171~]  to    bash-3.2#
+
+  Now, we will try to connect using "test" from "bash-3.2#" type command "ssh test@ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com" ----> Public IP
+  It will say "Permission denied",,,, as we have not refreshed the system.
+
+  So, again got to master node in server and switch to root user. In comand prompt type :
+  bash-3.2#ssh -i "mynodes.pem" ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com --------------------------------------------------------> Public IP
+  and  the command prompt will change to "[ec2-user@ip-172-31-18-171~] -----> Internl IP " and type "sudo su -" and become root user.
+  Now, the command prompt will change to "[root@ip-172-31-18-171~] -----> Internl IP 
+  now, type "systemctl restart sshd" in all 4 sessions/nodes). It ensure that we must not use my nodes/pem keys for everytime we login.
+  Then logout from root to master prompt by typing "logout". And then logout from master by typing "logout". Means :
+  [root@ip-172-31-18-171~]    	to    [ec2-user@ip-172-31-18-171~] -----> Internl IP 
+  [ec2-user@ip-172-31-18-171~]  to    bash-3.2#
+
+  Now, check login with Test with command prompt "bash-3.2" and using command :
+  Either (ssh -i "mynodes.pem" ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com) or simply (ssh test@52.66.70.251) and give the password. -> Public IP
+
+  If completely logged out, type "ssh test@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com"
+
+  Now the command prompt became like "[test@ip-172-31-18-171~]" 		-------------------------------------------------------------------> Public IP
+  It will login into test account. Do this step on all nodes/ sessions opened in putty (all 4 sessions/ nodes)
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  Is it sufficient to establish connection between various servers ????
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+* But it is not enough to connect all nodes (machines) from master.
+  So, we need to generate and share the key accross all nodes and make sure that communication is happening good without asking for passwords.
+
+  Keep the command prompt with test user only.. like "[test@ip-172-31-18-171~]"     -------------------------------------------------------------------> Public IP
+  To know IP of a machine/node, come to node1 and type "ifconfig -a" In "inet", the digits will show the public IP (172.31.18.172). Copy it.
+  Come to master and type "ssh test@172.31.18.172" --- (private IP) It is asking for password. This is not good as Ansible works on ssh-keyless authentication.
+  
+  Good Ansible steup should not ask password everytime when we login to other machine from master. 
+  It should have interprocess ssh communication without asking the password
+  
+* So, we need to share the keys across all systems individually. 
+  Before that we will give some root previliges to test user as "sudo su -" doesnot give us the root previliges.
+
+* Giving root previliges to Test user :
+  As of now, user Test doesnot have root previlige, for checking type "sudo su"
+  Now, logout from Test in master and connect to EC2 user by "ssh -i "mynodes.pem" ec2-user@ec2-52-66-70-251.ap-south-1.compute.amazonaws.com".
+  And give test user the root previlige by "sudo su -" and then go to "vi /etc/sudoers", come to bottom and type "test" in "#includedir /etc/sudoers.d". Ex: -
+  #include /etc/sudoers.d
+  ec2-user	ALL=(ALL)	NOPASSWD: ALL
+  test		ALL=(ALL)	NOPASSWD: ALL
+  
+  Now, logout from EC2 and login to Test user using (ssh test@52.66.70.251) and try to switch to root by typing (sudo su -)
+  The command prompt will be like "[test@ip-172-31-18-171~]"
+  Now, we can switch to root.... For checking type "whoami", it will show "root"
+  Do this in step on all nodes/ sessions opened in putty (all 4 sessions/ nodes)
+
+
+Somewhere, note down Private and public IP address of all maser, node1,node2 and node3 :
+We can replace Private IP with Host/domain name, and public IP with fully qualified domain name (Public DNS in console).
+Master - Private IP address - 172.31.18.171 , public IP address - 52.66.70.251
+Node1  - Private IP address - 172.31.18.172 , public IP address - 52.66.71.88
+Node2  - Private IP address - 172.31.18.170 , public IP address - 52.66.74.112
+Node3  - Private IP address - 172.31.10.10  , public IP address - 52.66.75.92
+
+Now, if we type "ssh test@172.31.18.172" , node1 private IP, it asks for password. As Ansible works on SSH keyless auhentication, it should not ask for password.
+To fix this, do the following :
+* type "pwd" to check if we are in present working directory. 
+  [test@172.31.18.171 ~]$ pwd --------> It should show "/home/test"
+* now type "ssh-keygen"  and it will generate a key which will be saved in home directory : "/home/test/.ssh/id_rsa.pub."
+  [test@172.31.18.171 ~]$ ssh-keygen -----> Your public key has been saved in /home/test/.ssh/id_rsa.pub. 
+* now share SSH of all other nodes accross individual nodes. It asks password for the first time. Type "ssh-copy-id 172.31.18.172" ---> Private ip of node1
+  [test@172.31.18.171 ~]$ ssh-copy-id 172.31.18.172
+* now, ssh authentication has been done. For checking try to login with test with IP of other nodes (node1)
+  [test@172.31.18.171 ~]$ ssh test@172.31.18.172
+  And now, the command prompt will change from "[test@172.31.18.171 ~]$" to "[test@172.31.18.172 ~]$" without asking password.
+  Now, each node can connect with  all other nodes for test, without asking password.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+* Type "cat /etc/redhat-release"
+ 
+  
+** C:\Users\hp\Downloads - where i downoaded mynodes.pem (my keypair)
+** how to run putty at first time :
+   https://mediatemple.net/community/products/dv/204404604/using-ssh-in-putty-
+  
+** "hp@hp-PC MINGW64 ~" is my default user
+   "[ec2-user@ip-172-31-16-75 ~]" is my default user in ec2
+
