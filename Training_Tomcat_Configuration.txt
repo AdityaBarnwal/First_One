@@ -1,0 +1,115 @@
+Tomcat Servers :
+Installation on Windows :
++++++++++++++++++++++++++
+* Download the "32-bit/64-bit Window Service installer"
+* Go to "Run bx" -> Services.msc -> click on "Start" for "Apace Tomcat 8.5"
+  [Port needs to be changed on jenkins. Normally, Tomcat works on port 8080]
+* while installing, keep everything as default and give following input when prompted on "Configuration" screen. Give :
+  "User name" = admin and "Password" = admin
+  Server shutdown port = 8085
+  http/1.1 Connector port = 8080
+  AJP/1.3 Connector port = 8009
+  Window Service name = Tomcat 8
+* Check on "Services.msc", if it is up and running.
+* Go to chrome : http://localhost:8089 (will open "Apache Tomcat Service" page)
+* Click on "Manager App" and give Username and password
+* In "WAR file to Deploy", click on "Chose file" and browse to "Target folder", where "Petclinic.war" exists, select and deploy it.
+* Under "Application" section, we can see "/petclinic". If started, "Start" button will get blocked.
+* Click on "/petclinic" under "Application" tab under "path" column.
+
+
+
+Installation on Linux :
++++++++++++++++++++++++++
+* yum erase httpd -y
+* Check if Java is installed (give "java -version")
+* Create a group called tomcat :
+  sudo groupadd tomcat
+* Create users and add them to the group tomcat :
+  sudo useradd -M -s /bin/nologin -g tomcat -d /opt/tomcat tomcat
+  sudo useradd -s /bin/nologin -g tomcat -d /opt/tomcat tomcat		#### may not be required
+  (So, group "tomcat" will have its home directory in /opt/tomcat)
+* sudo mkdir /opt/tomcat
+* Go to "cd Downloads/" and give "wget http://redrockdigimark.com/apachemirror/tomcat/tomcat-8/v8.5.31/bin/apache-tomcat-8.5.31.tar.gz"
+* Create a directory and unzip the package as below
+  sudo tar xvf apache-tomcat-8*tar.gz -C /opt/tomcat
+* Providing the necessary permissions for the folders
+  cd /opt/tomcat	-> ls -l =0 (apache-tomcat-8.5.31)				#### or cd /opt/tomcat/apache-tomcat-8/
+  chgrp -R tomcat /opt/tomcat										#### or chgrp -R tomcat /opt/tomcat/*
+  cd apache-tomcat-8.5.31/
+  chmod -R g+r conf													#### or chmod -R g+r conf/*
+  chgrp -R tomcat /opt/tomcat/apache-tomcat-8.5.31/
+  chmod g+x conf
+  chown -R tomcat webapps/ work/ temp/ logs/
+* Create a config file, as we will not be able to use systemctl. 
+  "Systemctl" is not recognizing tomcat, so we will create a configuration file in "etc/systemd"
+* vi /etc/systemd/system/tomcat.service
+  and copy tth whole code mentioned below in it :
+  # Systemd unit file for tomcat
+  [Unit]
+  Description=Apache Tomcat Web Application Container
+  After=syslog.target network.target
+
+  [Service]
+  Type=forking
+
+  Environment=JAVA_HOME=/usr/lib/jvm/jre
+  Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+  Environment=CATALINA_HOME=/opt/tomcat
+  Environment=CATALINA_BASE=/opt/tomcat
+  Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+  Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+
+  ExecStart=/opt/tomcat/bin/startup.sh
+  ExecStop=/bin/kill -15 $MAINPID
+
+  User=tomcat
+  Group=tomcat
+  UMask=0007
+  RestartSec=10
+  Restart=always
+
+  [Install]
+  WantedBy=multi-user.target 
+* Restart the systemctl daemon.
+  systemctl daemon-reload
+  systemctl start tomcat
+  systemctl enable tomcat
+* Goto browser and type the below address as given : http://server_IP_address:8080		#### will throw error
+* Providing permission for manager to edit the apps in the apache web server.
+  vi /opt/tomcat/conf/tomcat-users.xml 			#### and check for this line in the file and paste below lines in the bottom of the file and save it.
+  <tomcat-users>
+      <user username="admin" password="password" roles="manager-gui,admin-gui"/>
+  </tomcat-users>
+* Restart the systemctl daemon.
+  systemctl daemon-reload
+  systemctl start tomcat
+  systemctl enable tomcat
+
+* Sometimes, clicking on "Manager App" will not ask for username/password and shows "401 Unauthorised". This is due to upgradation of Tomcat version.
+  So, do the following :
+  cat hosts
+    192.168.191.151. master.example.com master
+  vim /opt/tomcat/apache-tomcat-8.5.31/webapps/host-manager/META-INF/context.xml
+    change from 		:: allow = "127\.\d ...d+\::1\0:...0:1\>"
+	to 					:: allow = "192\.168\.1\.124/127\...d+\::1\0:...0:1\>"
+	or to comment from 	::"<Context ... end_of_line_of allow /> and write "<Context> below line. Ex : <Context>
+																									  <Manager...
+	or to 				:: allow = ".*"/>
+	or to 				:: allow = "^.*$"/>
+* Restart the systemctl daemon.
+  systemctl daemon-reload
+  systemctl start tomcat
+  systemctl enable tomcat
+	
+* Now Webserver has been configured in Centos machine.
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Step:1
+Installing JAVA or check if java is already installed using "java --version"
+
+sudo yum install java-1.7.0-openjdk-devel
+Note that a shortcut to the JAVA_HOME directory, which we will need to configure Tomcat later, can be found at /usr/lib/jvm/jre
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

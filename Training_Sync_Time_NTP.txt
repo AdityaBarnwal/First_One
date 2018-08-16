@@ -1,0 +1,46 @@
+NTP : Network Time Protocol
+***************************
+Case1 :
++++++++++++++++++++++++++++
+* date
+* yum install ntp -y
+* systemctl start ntpd
+* systemctl enable ntpd				#### Date/Time synchronised
+* ntpdate
+
+
+Case2 :
++++++++++++++++++++++++++++
+If Date/Time are still not in sysc, then :
+* vi /etc/ntp.conf
+* go to site "https://www.ntppool.org/en/" and click on "Asia" from "Active Servers" list.
+* come to "See all zones in Global" and click on "India" and it ill be something like below :
+  server 0.asia.pool.ntp.org
+  server 1.asia.pool.ntp.org
+  server 2.asia.pool.ntp.org
+  server 3.asia.pool.ntp.org
+* Copy the above content (remove indentation problem via notepad)and come to "/etc/ntp.conf", where something like below will be present :
+  Serve	0.CentOS.pool.ntp.org	iburst
+  Serve	1.CentOS.pool.ntp.org	iburst
+  Serve	2.CentOS.pool.ntp.org	iburst
+  Serve	3.CentOS.pool.ntp.org	iburst
+* Replace/comment the above iburst lines using a "#" and paste the copied lines using "Shift + Insert". Finally, the file may look like :
+  # Serve	0.CentOS.pool.ntp.org	iburst
+  # Serve	1.CentOS.pool.ntp.org	iburst
+  # Serve	2.CentOS.pool.ntp.org	iburst
+  # Serve	3.CentOS.pool.ntp.org	iburst
+  server 0.asia.pool.ntp.org
+  server 1.asia.pool.ntp.org
+  server 2.asia.pool.ntp.org
+  server 3.asia.pool.ntp.org
+
+
+Case3 :
++++++++++++++++++++++++++++
+If Date/Time are still not in sysc, then :
+* cat /etc/localtime				#### thorows the output in non readable/ compiled format
+* ls -l /etc/localtime				#### will show that it is linked with some other file "../usr/share/zoneinfo/Asia/Kolkata", read that one.
+  If "Asia/Kolkata" is not our time zone, 
+  then type "cp /usr/share/zoneinfo/America/New_York	/etc/localtime"  or  type "ln-s /usr/share/zoneinfo/America/New_York	/etc/localtime"
+
+* ntpq -pn 			#### Connectiin between our servers and servers present in our config files											

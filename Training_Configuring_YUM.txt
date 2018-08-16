@@ -1,0 +1,174 @@
+Configuring rpm :
+*****************
+* df -h 								----> shows all directories and external devices and their Size, Used , Available and Use %
+* check for the CD, if it is connected. Here, ISO CD name is "CentOS 7 x86_64"
+* So, we will got to the place where CD is there : "cd /run/media/root/CentOS\ 7\ x86_64/" and ls after going to the path will give :
+   CentOS BuildTag    	GPL   	    LiveOS 		RPM-GPG-KEY-CentOS-7
+   EFI			Images	    Packages		RPM-GPG-KEY-CentOS-Testing-7 ----> We need these packages (4.2G)
+   EULA			isolinux    repodata		TRANS.TBL
+* "mkdir -p /var/ftp/pub/packages"		----> Make a directory where we want our packages to be copied. 
+* mount -t iso9660 /dev/sr0 /mnt		----> mounts cd from sr0 to mnt
+   -> cd /mnt/ 							----> and after giving ls, we can see the data ( in Packages directory)
+   -> mkdir -p /var/ftp/pub/packages	----> creates Package directory in local system
+   -> cp -v Packages/* /var/ftp/pub/packages --> copies everything inside Packages from CD to local system
+
+OR
+
+   -> "cd /var/ftp/pub/packages"		----> Go inside /var/ftp/pub/packages and here we need to copy the ISO CD. 
+   -> "cp -v /run/media/root/CentOS\ 7\ x86_64/Packages/* ."	----> Copy CD Packages to Local directory Packages. 
+   -> while true						----> checking for report after every 3 seconds
+      > do ls-l /var/ftp/pub/packages/ | wc-l
+      > sleep 3
+      > done
+
+* rpm -ivh packagename					----> installs any packages
+* few rpm commands ::::
+   -> rpm -q packagename					----> to query the single package
+   -> rpm -qa packagename					----> to query the more packages
+   -> rpm -ivh packagename				----> to install the package
+   -> rpm -ivh packagename* --nodeps		----> to install the package forcefully
+   -> rpm -ivh packagename -force			----> to install the package forcefully
+   -> rpm -U packagename					----> to upgrade the package
+   -> rpm -e packagename --nodeps			----> to delete the package forcefully
+
+In rpm, we need to go to that particular location to install the packages.
+Means, whereever we are, we need to navigate to particular package's location and then we need to start installing stuffs.
+
+
+Configuring YUM (Yellowdog Updater, Modified) :
+***********************************************
+* After completing above steps, we can further continue with setting up of YUM.
+* Configure a particular configuration file with ".repo" as suffux in "/etc/yum.repos.d/". Ex: "/etc/yum.repos.d/server.repo" (Important)
+* vi /etc/yum.repos.d/server.repo
+[serverone]
+name=serverone
+baseurl=file:///var/ftp/pub/packages/		----> from file/ftp/http. Ex : baseurl=https://192.168.191.64:/var/ftp/pub/packages/
+gpgcheck=0
+enabled=1
+
+* Now, we have to install a software called "createrepo" used for creating repositories and then we need to create a metadata file
+  -> cd /var/ftp/pub/packages
+  -> rpm -q createrepo						----> gives a file something like "createrepo-0.9.9-28.el7.noarch"
+  -> rpm -ivh *createrepo*
+  Now, the createrepo is installed.
+
+[Note] : If we create our meadata on Packages folder, we need to mention "baseurl=file:///var/ftp/pub/packages/" in .repo file
+		 If we create our meadata on pub folder, we need to mention "baseurl=file:///var/ftp/pub/" in .repo file
+         In xxxx.repo file, We just need to say, where our metadata is.
+
+* createrepo -v .  ----> We are in "/var/ftp/pub/packages/" before running createrepo. Creates the metadata file in "/var/ftp/pub/packages/"
+					      We should be in the locatons, means inside our Packages directory.
+   OR 
+   cd ..
+   createrepo -v /var/ftp/pub/packages		----> Repository file will get saved in the packages location
+
+   Now, YUM is ready to be used
+
+* yum repolist								----> lists available repositories. Ex : CentOS-7 - Base, CentOS-7 - Extras, CentOS-7 - Updates and serverone
+* yum install epel-release -y				----> we need to install this repository
+* yum search installed | grep -i httpd 		----> installs httpd
+
+* scp /etc/yum.repos.d/CentOS-* root@slave:etc/yum.repos.d ----> sending our Packages copied from CD to Slave machine. Includes metadata files too.
+
+
+
+For downloading other softwares from internet directly :
+********************************************************
+* Google "rpm jenkins" and copy the rpm related commands from the link "https://pkg.jenkins.io/redhat-stable/"
+   wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo  
+   rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key			    
+
+* The configuration file will get saved in the location "/etc/yum.repos.d/jenkins.repo" and the content will be like :
+[jenkins]
+name=Jenkins-stable
+baseurl=http://pkg.jenkins.io/redhat-stable		----> from file/ftp/http. Ex : baseurl=https://192.168.191.64:/var/ftp/pub/packages/
+gpgcheck=1
+* We need to download the key as well by typing "rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key" as mentioned earlier.
+  Some keys will be chargeable some will not. Here, Jenkins is open source.
+* yum repolist all 								----> Check if jenkins repository is appearing in our search
+* yum install jenkins							----> installs jenkins 2.107.3-1.1 (latest version)
+
+[Note] : We cannot do local install from it as it would need base url, which is present in jenkins.repo
+
+* "wget" will download stuffs in current location only
+* If we copy the link of old version rpm, by right-clicking on the rpm-file and typing the below :				############ doubt in this
+  "wget" and paste the copied link, it will download the rpm file to the current location and from downloaded rpm, we can do the local install as well.
+* give "ls" and it will show the downloaded ".rpm" file like "jenkins-2.107.2-1.1.noarch.rpm"
+* yum localinstall jenkins-2.107.2-1.1.noarch.rpm ----> will download the jenkins of version "2.107.2-1.1"
+
+
+Important commands for installing functional libraries :
+********************************************************
+* If ifconfig/ route -n is not working
+  -> yum install net-tools
+  -> yum list net-tools
+  -> ntp - for syncing time
+
+* yum install vim -y				----> Installing vim
+
+* ntp - for syncing time
+* yum install yum-utils
+  yum-config-manager --disable epel
+  yum-config-manager --enable epel
+
+Installing HTTPD :
+******************
+* yum install httpd -y
+  systemctl start httpd
+  systemctl enable httpd
+  systemctl status httpd
+  netstat -tulpn | grep -i http		----> tells on which port HTTP is running (In second column,'80')
+
+* Creating a static website in index.html ::
+  cat /etc/httpd/conf/httpd.conf 	----> stores default "html page" activating scripts and important scripts are below :
+   ServerRoot "/etc/httpd"
+   Listen 80
+   Include conf.modules.d/*.conf
+   User apache
+   Group apache
+   ServerAdmin root@localhost
+   DocumentRoot "/var/www/html"
+   <Directory "/var/www/html">
+   ErrorLog "logs/error_log"
+
+* vim /var/www/html/index.html  	----> stores the "html page" we want to execute on chrome. Simple scripts are below :
+   <html>
+   <body bgcolor=yellow>
+   <div style="width: 100%; font-size: 40px; font-weight: bold; text-align: center;">
+   <bgcolour ="red">
+   <marquee>
+   Welcome to DevOps Class
+   </bgcolour>
+   </marquee>
+   </div>
+   </body>
+   </html>
+
+* Open chrome and type the IP and we can see the static page displayed.
+
+* firewall-cmd --permanent --add-port=80	----> Configured firewall to allow port 80
+  OR
+  firewall-cmd --permanent --add-service=http	----> Configured firewall to allow http service
+
+* yum remove httpd
+
+* Setting up of Static IP :
+  -> ip a 				---> 192.168.191.155
+  -> vim /etc/sysconfig/network-scripts/ifcfg-ens33 
+     Type = "Ethernet"
+	 Proxy_Method = "None"
+	 Browser_Only = "no"
+	 Bootproto = "none"
+	 Defroute = "yes"
+	 Name = "ens33"
+	 UUID = "xxxxxxxxxxxxxx"
+	 Device = "ens33"
+	 Onboot = "yes"
+	 IpAddr = 192.168.191.151
+	 Netmask = 255.255.255.0
+	 Gateway = 192.168.191.2
+	 DNS1 = 192.168.191.2
+	 DNS2 = 8.8.8.8
+  -> systemctl restart network
+  -> ping google.com 
+  -> ip a 				---> changed from 192.168.191.155 to 192.168.191.151

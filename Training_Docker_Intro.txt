@@ -1,0 +1,309 @@
+20/07/2018 : Start
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Docker beginning :
+* Virtual system details is fetched by hypervisors and we need to decide resorces before allocating but in containerisation, its not like that.
+* Virtualization is for effective use of hardwares but containerisation is more effective.
+* Virtualization uses its own OS kernel but containerisation uses host OS kernel.
+* Virtualization :   VM -> HOST OS -> Hypervisor    -> guest os -> Binares -> Application
+  Containerisation : VM -> HOST OS -> Docker engine -> Binares  -> Application
+  
+* OS : FreeBSD -> Unix -> Linux/ Windows/ Macs
+* Docker hub/ Docker registry/ Docker staore are same.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+DOCKER COMPONENTS :
+* Client - Server Architecture
+* Sockets or RESTfull API and connects via Network using TCP/IP or a common bridge connection
+* Docker Daemon
+* Docker client
+* Images - a read-only templates
+* Registries - holds the images with or without data
+* Container - Created from images and it would be in Runtime
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+How Resources in the host are managed ?
+Restricts the usage for containers.
+* Docker uses a tech called CGROUPS or Controlled groups to achieve this.
+* This CGROUPS helps us to restrict the container in utilizing the system resources to an extent.
+To use this:
+* docker run --cpus=.5 <container-name>
+  This now restricts the container to use only 50 percent of the CPU from host.
+* docker run --memory=100m <container-name>
+  This now restricts the container to use only 100MB of memory from the host
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Installations od Docker :
+On Windows :
+on Windows
+* It depends on Hypervisor (HyperV) settings. HyperV is like VMware but a devoted software of windows.
+* In windows, if we don't have VMware, we can still do containerisation with the help of HyperV.
+
+On Windows :
+* Docker tool box 
+* When we install "Docker tool box" and run it, automatically, it creates a virtual system in Oracle VMware with name "default".
+* Type "services.msc" and it will take us to "Services" window.
+* After downloading and installing "Docker Tool Box", we need to start "Docker Quickstart terminal". 
+  It wil start the "default" virtual machine in Oracle VMware system.
+* From "Control Panel", go to "Programs" then "Programs and Features" and click on "Turn Windows features on or off". A new window will pop up.
+  Check in "Containers" and click okay. It may ask for a restart of system. Restart it.
+
+
+* Google for "docker download" and go to "https://docs.docker.com/docker-for-windows/install/"
+* Click on "Download from Docker Store" and it will take us to "Docker store"
+
+20/07/2018 : Completed
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Installation of Docker :
+On CentOS :
+* yum update -y
+* yum install yum-utils -y
+* yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+* yum-config-manager --disable epel
+* yum install docker-ce 
+* systemctl start docker
+* systemctl enable docker
+* docker version
+* docker pull centos:latest
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#To know about images and containers
+------------------------------------
+* docker login								=> Creates an account in Docker hub.
+* docker 									=> Shows all docker commands that can be used.
+* docker search image_name					=> Used to find images by image name, user name, or description.
+* docker pull image-name					=> Fetches the image from docker repository (latest version)
+* docker pull image-name:12.04				=> Fetches the image from docker repository (12.04  version)
+* docker run hello-world					=> Displays "Hello from Docker." saying that the Docker is working perfectly on our system.
+* docker images								=> Shows the list of all images on local system.
+* docker image ls
+* docker image rm image-name
+* docker ps									=> Shows all running containers.
+* docker ps -a 						 		=> to know the history of containers
+* docker run -it image-name bash 			=> to start the container in an interactive mode with bash shell
+  exit										=> to come out of container. In "-it", the container will get stopped & exited. 
+											   In "docker ps -a", we can still find the exited status of the container. 
+											   If we start that conainer using "docker start container-Id", it will start at the point where it stopped.
+  
+* docker run -dt image-name 		 		=> to start the container in a detachable mode
+  exit										=> to come out of container. In "-dt", the command prompt comes out but the container keeps running
+  docker stop xxx							=> stops the container completely
+  docker rm xxx yyy							=> removes the container-id xxx and yyy from "ps -a", that is docker-run list
+* docker exec -it container-id bash 		=> to go inside docker container that is running in dettached mode
+  - cat /etc/os-release
+* docker container stop container-id	 	=> to stop the container
+* docker exec --help 						=> to find help about a commands
+* docker pull nginx
+* docker run --name adinginx -dt nginx 		=> giving a name while starting a container
+  docker run -dt --name adinginx nginx  	=> giving a name while starting a container
+* docker run -dt -P --name adix -v /var/nginx_home/:/usr/share/nginx/html nginx  => attching a volume and running a container in default host port
+* docker info 									=> will tell about info
+* docker rm $(docker ps -a -q -f status=exited)	=> Deletes containers with status 'exited'.
+												   '-q' only returns the numeric IDs and -f filters output on conditions given.
+
+* docker build -f Dockerfile -t adiimage .	 => Save the Dockerfile & build the image using this command. Dockerfile can be replaced by xxxyyy if "-f" is used
+* docker run -dt -P --name adicont adiimage	 => Once the image is created, run the image for creating a container of name adicont
+
+* docker run -dt --name adiwps --link adisql -P wordpress			=> Will run in "bridge" network
+  docker run -dt --name adiwp1 --link adisql -p 8881:80 wordpress
+  
+* docker push user_name/image_name			=> Push a repository to its registry. 
+										       For this to work, we should have named an image (while building) or committed our container to a named image.
+* Use top in container and in host to show about the processes running
+* ps -ef 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Dockerfile Commands:
+--------------------
+Below are some dockerfile commands you must know:
+FROM 		- The base image for building a new image. This command must be on top of the dockerfile.
+MAINTAINER 	- Optional, it contains the name of the maintainer of the image.
+RUN 		- Used to execute a command during the build process of the docker image.
+ADD 		- Copy a file from host-machine to the new docker image. 
+			  There is an option to use an URL for the file. Then, Docker will download that file to the destination directory.
+ENV 		- Define an environment variable.
+CMD 		- Used for executing commands when we build a new container from the docker image.
+ENTRYPOINT 	- Define the default command that will be executed when the container is running.
+WORKDIR 	- This is directive for CMD command to be executed.
+USER 		- Set the user or UID for the container created with the image.
+VOLUME 		- Enable access/linked directory between the container and the host machine.
+EXPOSE 		- Open the mentioned ports in the containers
+CMD 		- Commands to use in the container.
+  
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#How to run Nginx :
+-------------------
+* docker pull nginx
+* vim /var/nginx_home/index.html
+  <h1> Hi, This is from Nginx server </h1>
+* docker run -dt -P --name adix -v /var/nginx_home/:/usr/share/nginx/html nginx
+  docker run -dt --name adix  -P -v /var/nginx_home:/usr/share/nginx/html nginx
+* Come to browser and give the ip address of host centos machine and type the port number "32771" (Left side of PORTS from "docker ps")
+
+* docker inspect adix
+ "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/var/nginx_home",
+                "Destination": "/usr/share/nginx/html",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Building a new image :
+----------------------
+* Come to /var/nginx_home (in local system), where index.html file exists. (File, where we mentioned "<h1> This is from Nginx from Aditya </h1>")
+* Create a Dockerfile "Dockerfile" (can be any name like xxxyyy, if "-f" is supposed to be used) and write below in this file :
+FROM nginx:latest
+MAINTAINER aditya
+
+ENV NODE_ENV=prod
+ENV PORT=3000
+
+COPY    . /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
+
+EXPOSE  $PORT
+
+* Save the file and build te image using the command "docker build -f Dockerfile -t adiimage ." [Dockerfile can be replaced by xxxyyy if "-f" is used]
+* Once the image is created, run the image for creating a container "docker run -dt -P --name adicont adiimage"
+* docker ps
+   0.0.0.0:32773->80/tcp, 0.0.0.0:32772->3000/tcp
+   Go to browser and give host-IP:32773 and the page appears (host-IP:32773 in browser is not working)
+   
+DOUBT : Mentioning Port in Dockerfile and giving -P is generating 2 ports for one container.
+		Menawhile, updating /var/nginx_home/index.html file in host system is affecting the running conainer at the same time.
+		
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#To run Mysql + Wordpress :
+---------------------------
+* docker pull mysql
+* docker pull wordpress
+* docker run --name adisql -e MYSQL_ROOT_PASSWORD=redhat -d mysql
+* docker run -dt --name adiwps --link adisql -P wordpress
+  OR
+  docker run -dt --name adiwp1 --link adisql -p 8881:80 wordpress
+* Come to browser & give the ip address of host centos machine & type the port number "32768" (Left side of PORTS from "docker ps" for Wordpress)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Some advanced commands in Docker :
+----------------------------------
+#To use docker cli remotely.
+docker -H=remote-docker-engine:2375
+docker -H=192.168.191.151:2375 run nginx
+
+# Remove unused images
+docker image prune
+
+# Remove stopped containers.  
+docker container prune
+
+# Remove unused volumes
+docker volume prune
+
+# Remove unused networks
+docker network prune
+
+# Command to run all prunes:
+docker system pruneList all containers (only IDs)  
+docker ps -aq
+
+# Kill all containers (only IDs)  
+docker kill $(docker ps -q)
+
+# Stop all running containers.  
+docker stop $(docker ps -aq)
+
+# Remove all containers. 
+docker rm $(docker ps -aq)
+
+# Remove all images. 
+docker rmi $(docker images -a) 
+docker rmi $(docker images -q)
+
+# Force remove container. 
+docker rm -f CONTAINER_ID
+
+# Remove unused images. 
+docker rmi $(docker images --filter "dangling=true" -q --no-trunc) 
+
+# Remove Network commands:
+docker network disconnect --force network_name container_name (disconnect network from container)
+docker network rm network_name
+
+# To see Logs for a Container: 
+docker-compose logs -f --tail=100 docker-mysql-container-name 
+
+Example : docker-compose logs -f --tail=100 app-server-dev 
+To give root access for docker:
+sudo chmod -R 0777 /var/run/docker.sock
+
+# To findout mysql docker IP: 
+docker inspect docker-mysql-container-name | grep IPAddress 
+Example : docker inspect docker_mysql_1 | grep IPAddress 
+
+# To login into mysql into docker container: 
+docker exec -it docker-mysql-container-name /bin/bash 
+Example : docker exec -it docker_mysql_1 /bin/bash 
+
+# To Copy any file into an running container: docker cp filename docker-mysql-container-name:/filename 
+Example : docker cp 18-7-17-cc.sql docker_mysql_1:/database_schema.sql 
+
+# To Copy any file from container into HOST: 
+docker cp :/file/path/within/container /host/path/target
+Example : docker cp cc-mysql:24-7-17.sql /Users/mkannan.TIS/
+Example :  docker cp cc-mysql:27-7-17-live.sql /home/ubuntu/docker - for Server To Import any SQL dump into mysql container: 
+
+docker exec -i docker-mysql-container-name mysql -u username -p password --database=db_name < dump.sql 
+
+Example : docker exec -i docker_mysql_1 mysql -uroot -pqwerty --database=customer_connect_1 < 26-7-17-local.sql
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Docker Networking:
+------------------
+In the driver based networking we have 3 types
+1. Use bridge networks
+2. Use overlay networks
+3. Use host networks
+4. Use Macvlan networks
+   - In bridge mode,Macvlan traffic goes through a physical device on the host.
+   - In 802.1q trunk bridge mode, traffic goes through an 802.1q sub-interface which Docker creates on the fly. 
+	 This allows you to control routing and filtering at a more granular level.
+
+Basic network types in Docker:
+------------------------------
+--net=host
+--net=bridge
+--net=container:NAME
+--net=none
+
+
+Commands:
+---------
+* docker network ls
+* docker network inspect bridge
+* docker run -it --net=<network name> container-name
+
+* docker network create my-net						=> Creates a new network
+* docker network ls									=> Lists all present network
+* docker network rm my-net							=> Removes a particular network
+* docker run --name name --net my-net nginx			=> Running and attaching a conainer to a particular network
+  Case1 : Working
+  docker run -dt --name adisql -e MYSQL_ROOT_PASSWORD=redhat --net my-net mysql
+  docker run -dt --name adiwps -P --net my-net wordpress
+
+  Case2 : Working
+  docker run -dt --name adisql -e MYSQL_ROOT_PASSWORD=redhat --net my-net mysql
+  docker run -dt --name adiwps --link adisql -P --net my-net wordpress
+  
+* docker network connect my-net nginx				=> Attaching a already running container to a network
+* docker network disconnect --force my-net nginx	=> Disconnecting a conainer from a network 
+* docker network create --subnet 192.168.128.0/17 --opt com.docker.network.bridge.name=docker_gwbridge --opt com.docker.network.bridge.enable_icc=false docker_gwbridge
+* Docker contents in the host machine:
+  cd /var/lib/docker 								=> In host, her we can see all info about containers, volumes, networks etc...
+  cat config.json | python -mjson.tool				=> If you see any of the JSON file like config.json, try reading them using this command
+

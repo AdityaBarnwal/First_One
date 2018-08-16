@@ -1,0 +1,35 @@
+Installation of Java on Windows:
+********************************
+-> Google for "java jdk" and o to the link "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
+-> In "Downloads" tab, click on "Java Platform (JDK) 8u60" and various options tp download java appears based on O/S.
+-> Click on "Accept License Agreement".
+-> Click on the link next to "Windows x64" of around 182 MB.
+-> "Java JDK" gets downloaded and file name will be "jdk-8u60-Windows-x64". Double click on it.
+-> Installation starts, keep everything s default and complete the installation.
+-> After successful installation, "Java...successfully installed" message appears.
+-> Go to "C:\Program Files\Java", two folders will exists. Rename name to simpler names.
+   from "jdk1.8.0_60" to "jdk" (Java Development Kit)
+   from "jre1.8.0_60" to "jre" (Java Runtime Environment)
+
+We need to setup environment variable for Java, so that whenever any program wants to look for Java, it automatically recognizes it.
+-> Control Panel -> System and Security -> System -> Advanced System Setting
+-> A pop up window appears. Click on "Environment variables" and come to "System Variables" list. Select "Path" and double click on it.
+-> A pop up window appears with "Variable name" and "Variable value"
+-> Copy the address of "jdk bin". It will be like "C:\Program Files\Java\jdk\bin".
+-> Come to last of "Variable value", give a ";" & paste the address of "jdk bin" like "C:\Program Files\Java\jdk\bin" & give ";". It would look like below :
+   ;"C:\Program Files\Java\jdk\bin";
+-> Click on "OK" [3 times].
+-> Come to "Command prompt" & give "javac" and it lists out various options, means java has been installed and configured.
+
+Sometimes, we may have to configure "Java Home" for some systems after installing java. Below are steps:
+-> Control Panel -> System and Security -> System -> Advanced System Setting
+-> A pop up window appears. Click on "Environment variables" and come to "User Variables" list and click on "New".
+-> Give below inputs and click "OK" [3 times] :
+   Variable Name : JAVA_HOME
+   variable Value : C:\Program Files\Java\jdk\bin 	----> Path of jdk
+-> That's it. Done !!!
+
+
+
+Installation of Java on CentOS:
+*******************************

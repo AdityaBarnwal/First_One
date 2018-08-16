@@ -1,0 +1,93 @@
+Download CentOS :
+*****************
+-> Search for "CentOS download" and click on "Download" or go to " "
+-> Click on "many mirrors" and open the link present on side of "India" (https://centos.excellmedia.net/)
+-> Click on "7.2 or 7.3" or any folder which have more than two contents and then click on "isos/" folder and then click on "x86_64/" folder.
+-> Click on "CentOS-7-x86_64-DVD-1804.iso" of 4.2G for full installation and "CentOS-7-x86_64-Minimal-1804.iso" of 906M for minimal installation to download.
+
+
+Download Oracle VM VirtualBox Manager :
+***************************************
+-> Go to "https://www.virtualbox.org/wiki/Downloads" and click on "Windows hosts"
+
+
+Setting up Virtual Machine :
+-> Enable VT (Virtualization Technique) via BIOS option for installation of VM over host.
+-> Click on "New" tab in "Oracle VM VirtualBox Manager" and give the name and address of Virtual machine, where we want to get it created.
+-> Just pass all default functions and keep clicking "next" and finally the Virtual machine gets created
+-> If we are connecting through WiFi, select the Virtual machine and right click to go to "Settings"
+   Inside "Settings", click on "Network". Under "Adapter 1" select "Bridged Adapter" as "Attached to" and "Qualcomm Atheros AR9285 802.11b/g/n Wifi Adapter" as "Name"
+-> Finally click on "OK"
+-> Keep the Virtual machine selected and click on "Start" and it will start running.
+-> Select the language and click "ok" and it will bring us to home page
+-> Click on "Network & Host Name" and make the "Ethernet (enp0s3)" to "ON" and finally click on "Done".
+   It will bring us to home page and now, under "Network & Host Name" tab and we could see "Wired (enp0s3) connected"
+-> Click on "Date & Time" and make the "Kolkata" region selected and finally click on "Done".
+   It will bring us to home page and now, under "Date & Time" tab and we could see "Asia/Kolkata timezone"
+-> Click on "Installation Destination" and select the "VMware,VMware Virtual S" and click on "I will configure partitioning." tab.
+-> 3 Division we need to create with name and memory as "/boot" with 500MB, "/" with 17GB and "swap" with 2.04GB and click on "Accept Changes"
+   It will bring us to home page and now, under "Installation Destination" and we could see "Local media"
+-> Finally, click on "Begin Installation"
+-> Meantime, it gets installed, create root password.
+
+
+
+Important prequisites points :
+******************************
+* Clone in VM can be done only after shutting down.
+* Command line change is applied straight way, but after logging off/reboot it goes off. 
+  Configs file change can be seen only after reboot, but it will be premanent.
+  Ex: hotsname jenkins.server.com 
+  vi /etc/hostname #### And then writing jenkins.server.com inside it.
+* Check date : date
+* Stop firewall : 
+  systemstl status firewalld #### (Active: active (running))
+  systemstl stop firewalld
+  systemstl disable firewalld
+  systemstl status firewalld #### (Active: inactive (dead))
+* Turning off selinux for proper working of protocols in Apache servers (for Redhat based OS):
+  getenforce   #### will show the status 'Enforcing'
+  setenforce 0 #### will switch off the SELinux
+  getenforce   #### will show the status Permissive
+* cd /home/aditya/ - always work from YOUR home directory.
+* ip a 	       #### checks the ip of the system under "enp0s3" session
+* Set HOSTNAME and edit /etc/hosts file as below. In this system, we have set the hostname as "jenkins.example.com" and its ip is "192.168.31.164"
+  HOSTNAME : slave.server.com
+  HOSTS : 192.168.31.123 slave.example.com slave
+	  192.168.31.164 jenkins.example.com jenkins
+  "Ping" should work for "192.168.31.164" or "jenkins.example.com" or "jenkins"
+
+  scp /etc/hosts  192.168.191.151:/etc/hosts ----> copy one file from source to target.
+
+
+* kill -9 pid		----> will kill that pid
+* df -h 		----> shows all directories and external devices and their Size, Used , Available and Use %
+* fdisk -l 		----> 
+* fdisk /dev/sda 	----> starts process to create new drive in hard disk (sda). sda1 and sda2 were already created
+  p -> m -> n -> p	----> will create a new drive with name sda3 and then finallt 'w' to write the changes
+* free -m
+* swapon 
+* cat /etc/fstab
+* swapoff /dev/mapper/centos-swap
+* cat /var/logs/messages | grep -i error --->  system related logs will exists here
+
+
+Setting up of static-ip
+***********************
+-> Making the IP static
+   If my ip is 192.168.191.149, gateway will be 192.168.191.1 (2nd ip address of the series)
+
+-> vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+   TYPE="Ethernet"
+   BOOTPROTO="none" or "static"
+   NAME="enp0s3"
+   UUID="fecff1bc-164b-4fb4-a0f4-cf7bb9c6c12b"
+   DEVICE="enp0s3"
+   ONBOOT="yes"
+   IPADDR=192.168.191.149
+   NETMASK=255.255.255.0
+   GATEWAY=192.168.191.2
+   DNS1=192.168.191.2
+   DNS2=8.8.8.8
+  
+-> systemctl restart network
