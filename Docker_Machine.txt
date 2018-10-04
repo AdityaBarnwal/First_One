@@ -1,0 +1,46 @@
+====================================================================================================================================================================
+Docker Machine : Creating Docker machines -
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+$ docker-machine ls						---- Show all docker machines created
+$ docker-machine create -d virtualbox temp1.sysadmin.local	---- "VBoxManage not found" error message
+$ whereis virtualbox						---- Tells the location of virtualbox
+$ sudo apt-get install virtualbox				---- Installs virtualbox
+$ whereis virtualbox						---- Shows sme address
+$ docker-machine create -d virtualbox temp1.sysadmin.local	---- Shows "To see ... virtual machine, run :docker-machine env temp.sysadmin.local"
+$ docker-machine env temp1.sysadmin.local			---- In order to get environment variables, we need to run this command
+  It, will display some export messages and something like below :
+  export DOCKER_TLS_VERIFY="1"
+  export DOCKER_HOST="tcp://192.168.99.100:2376"
+  export DOCKER_CERT_PATH="/home/aditya/.docker/machine/machines/temp1.sysadmin.local"
+  export DOCKER_MACHINE_NAME="temp1.sysadmin.local"
+  # Run this command to configure your shell:
+  # eval $(docker-machine env temp1.sysadmin.local)
+
+[Above variables will be set if we run "$ eval $(docker-machine env temp1.sysadmin.local)"]
+$ eval $(docker-machine env temp1.sysadmin.local)		---- Set above variables in current docker machine
+$ echo $DOCKER_HOST						---- Once env variables are set, we can run echo for any env variables and can get the value.
+$ docker-machine ls						---- Shows docker machine name, its Driver (virtualbox), State (Running), URL (DOCKER_HOST) etc..
+$ docker-machine env temp2.sysadmin.local			---- In order to get environment variables, we need to run this command
+$ eval $(docker-machine env temp2.sysadmin.local)		---- Set env variables in current docker machine (Active will show a '*')
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Setting Aliases :
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+$ sudo nano .bashrc
+scroll down to bottom, type :
+alias docker-machine-temp1='eval $(docker-machine env temp1.sysadmin.local)'
+alias docker-machine-temp2='eval $(docker-machine env temp2.sysadmin.local)'
+Save the file and commit it by typing 
+$ source .bashrc
+
+$ docker-machine -temp1						---- Will switch to temp1 machine just as "$ eval $(docker-machine env temp1.sysadmin.local)" does
+$ docker-machine -temp2						---- Will switch to temp2 machine just as "$ eval $(docker-machine env temp2.sysadmin.local)" does
+
+====================================================================================================================================================================
+  
+
+
+
+========================================================================================================================================
+Docker Swarm :
+----------------
