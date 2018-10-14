@@ -1,0 +1,73 @@
+Jenkins Pipelines :
+-------------------
+* Declarative pipelines
+  Code is simpler in Groovy syntax and is written locally in a file and is checked into a SCM (Git)
+  The code is defined within a "pipeline" block. Example :
+  pipeline {
+  .
+  }
+* Scripted pipelines
+  Code is written in traditional way and uses stricter Groovy syntax. The code is written in Jenkins UI instance.
+  The code is defined within a "node" block. Example :
+  node {
+  .
+  }
+
+Jenkins integration with Git and Maven :
+----------------------------------------
+* Open Jenkins -> New Item -> Enter the name of project "jenkinsfile-git-and-maven" -> Pipeline -> Under "Pipeline" tab, we could see :
+  Definition : Pipeline script from SCM. We need to select following options :
+				SCM : Git
+				Repositories 	     : 
+							 Repository URL : "https://github.com/javahometech/my-app" (Git URL where our Jenkinsfile exists) 
+							 Credentials 	: Give credentials if required
+				Branches to build     : 
+							 Branches to build : */master
+				Repository browser   : (Auto)
+				Script Path 	     : Jenkinsfile
+				Lightweight checkout : (*)
+  Click on "Save" button and click on "Build" button at left of the jenkins column.
+
+[NOTE : "Pipeline syntax" can be used to generate the required syntax]  
+
+-> Jenkinsfile in Git repository : Requirement is, Stage1 (Git checkout) and Stage2 (Compiling, testing and packaging the code) :
+---------------------------------------------------------------------------------------------------------------------------------
+node{
+    stage('Git checkout'){
+      git 'https://github.com/javahometech/my-app'
+	}
+	stage('Compile-Package'){
+	  sh 'mvn package'
+	}
+}
+
+-> Result after executing the build with above Jenkinsfile : "mvn : command not found"
+
+-> Fixing above Jenkinsfile :
+-----------------------------
+- Click on "Pipeline syntax" under "Pipeline" tab and give following details :
+  Sample Step : tool: Use a tool from a predefined Tool Installation
+  Tool Type   : Maven
+  Tool 		  : maven-3 
+			   (We, previously configured Maven with name "maven-3" in "Global Tool Configuration" and specified the name of path as "maven-3".
+			    Hence, "maven-3" is appearing from scroll button.)
+
+- Click on "Generate Pipeline Script" and following code will get generated : tool name: 'maven-3', type: 'maven'
+- Copy the generated script and come to Jenkinsfile in Git and paste it like below :
+node{
+    stage('Git checkout'){
+      git 'https://github.com/javahometech/my-app'
+	}
+	stage('Compile-Package'){
+	  def mvnHome = tool name: 'maven-3', type: 'maven'		
+	  // tool name: 'maven-3', type: 'maven' ----> this piece of code give us the maven home directory 
+	  // and returns maven home directory where maven is installed. "mvnHome" can be any variable name.
+	  sh "${mvnHome}/bin/mvn package"
+	}
+}
+
+- Commit changes of Jenkinsfile In Git and build the Job again in Jenkins and "Console Output' shows "Finished: success"
+  
+Chapter 08 completed
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

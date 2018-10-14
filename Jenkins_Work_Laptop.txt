@@ -1,0 +1,245 @@
+Java Instalation : https://tecadmin.net/install-java-8-on-centos-rhel-and-fedora/
+---------------------------------------------------------------------------------
+* yum install epel-release
+* yum repolist
+* yum list java* --show-duplicates
+* cd /opt/
+* wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/jdk-8u181-linux-x64.tar.gz"
+* tar xzf jdk-8u181-linux-x64.tar.gz
+* cd /opt/jdk1.8.0_181/
+* alternatives --install /usr/bin/java java /opt/jdk1.8.0_181/bin/java 2
+* alternatives --config java
+* alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_181/bin/jar 2
+* alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_181/bin/javac 2
+* alternatives --set jar /opt/jdk1.8.0_181/bin/jar
+* alternatives --set javac /opt/jdk1.8.0_181/bin/javac
+* java -version			#### java version "1.8.0_181"
+* echo $PATH			#### /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin/
+* echo $JAVA_HOME		#### /opt/jdk1.8.0_181
+Also apend these below commands to /etc/bashrc file to auto set environment variables on the system boot :
+  export JAVA_HOME=/opt/jdk1.8.0_181
+  export JRE_HOME=/opt/jdk1.8.0_181/jre
+  export PATH=$PATH:/opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin
+* source ~/.bashrc		#### reload .bashrc for accepting changes, without logging out
+* javac					#### should give java options
+
+
+Maven tool Instalation :
+------------------------
+* cd /opt/
+* wget http://mirrors.wuchna.com/apachemirror/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.zip
+* ls													#### apache-maven-3.5.4-bin.zip
+* yum install unzip
+* unzip apache-maven-3.5.4-bin.zip						#### apache-maven-3.5.4
+* rm apache-maven-3.5.4-bin.zip
+* cd apache-maven-3.5.4/bin 
+* export PATH=$PATH:/opt/apache-maven-3.5.4/bin/		#### *mentioning relative path, the same we need to give in Jenkins without "/bin/"
+  OR
+  export PATH='.........:/opt/apache-maven-3.5.4/bin/'	#### mentioning absolute path
+* echo $PATH 											#### /usr/local/sbin:..../opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin:/opt/apache-maven-3.5.4/bin/
+* mvn -version											#### Apache Maven 3.5.4
+# Apache Maven 3.5.4 (1edded0938998edf8bf061f1ceb3cfdeccf443fe; 2018-06-18T00:03:14+05:30)
+  Maven home: /opt/apache-maven-3.5.4
+  Java version: 1.8.0_181, vendor: Oracle Corporation, runtime: /opt/jdk1.8.0_181/jre
+  Default locale: en_IN, platform encoding: UTF-8
+  OS name: "linux", version: "3.10.0-862.el7.x86_64", arch: "amd64", family: "unix"
+
+Git Instalation :
+-----------------
+* yum install git -y
+
+
+Jenkins Instalation :
+---------------------
+* Go to "https://jenkins.io/download/" and under LTS click on "Red Hat/Fedora/CentOS".
+* wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+* yum install jenkins -y
+* cat /var/lib/jenkins/secrets/initialAdminPassword #### 313d522f37d14f40bb0bca4fd18d03e7, root, redhat : http://192.168.31.14:8080/
+* systemctl start jenkins
+* ip address:8080									#### starts jenkins in browser
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+* For creating a new job, click on "New Item" and select anyone among four from the list.
+
+* For "Freestyle project", important points :
+  - "Name" - game-of-life-packaging
+  - "Discard Old Builds" - For deciding the interval after which old builds should get deleted.
+  - "Source Code Management" -> Git -> For syncing Git will the job.
+    Repository URL 	  : https://github.com/wakaleo/game-of-life
+	Credentials	   	  : None
+	Branches to build : */master
+* Build -> Invoke top-level Maven targets -> Goals -> clean package
+
+In jenkins, jenkins runs all commands as "jenkins" user and in "jenkins" user profile, this maven path is not available.
+So, we will configure maven path location in "jenkins" user as well. Steps are below :
+* Come to jenkins home and click on "Manage Jenkins" and "Global Tool Configuration" under which we can specify the location of Maven.
+* Come to "Maven" paragraph and click on "Add Maven", present beside of "Maven installations" tag.
+  Name 		 : maven-3					#### Give some meaningful name 
+  Uncheck "Install automatically" box
+  Maven_HOME : /opt/apache-maven-3.5.4	#### We already set this earlier.
+  
+* Click on "Save" and now, we added the location of maven. So, jenkins can pick maven and can use maven commands for execution of jobs.
+* Come to the "game-of-life-packaging" job, click on "Configure".
+* Come to "Build" paragraph and give below inputs :
+  Maven Version : maven-3 				#### the one which we configured in "Global Tool Configuration" appears here. Select it.
+  Goals 		: clean package
+  
+* Click on "Save".
+  Based on above inputs, jenkins can locate the maven home directory and it automatically locates "mvn" command under that build.
+
+* Run the build and "war" file will get produced at - /var/lib/jenkins/workspace/game-of-life-packaging/gameoflife-web/target/gameoflife.war
+	
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	
+Jenkins installation on Laptop:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Basic tools installation :
+--------------------------
+* master : 192.168.31.27
+* systemctl status/stop/disable firewalld
+* setenforce 0
+* yum install vim net-tools wget unzip -y
+
+
+Java tool installation :
+------------------------
+* yum list java* --show-duplicates
+* yum install java -y
+* java -version						#### openjdk version "1.8.0_181" 
+* update-alternatives --config java	#### from listed options, select java with version "1.8"
+* echo $PATH						#### /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+* cd /opt/
+* wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/jdk-8u181-linux-x64.tar.gz"
+* tar xzf jdk-8u181-linux-x64.tar.gz
+* cd /opt/jdk1.8.0_181/
+* alternatives --install /usr/bin/java java /opt/jdk1.8.0_181/bin/java 2
+* alternatives --config java		####  /opt/jdk1.8.0_181/bin/java
+* alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_181/bin/jar 2
+* alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_181/bin/javac 2
+* alternatives --set jar /opt/jdk1.8.0_181/bin/jar
+* alternatives --set javac /opt/jdk1.8.0_181/bin/javac
+* java -version			#### java version "1.8.0_181"
+* echo $PATH			#### /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin/
+
+* echo $JAVA_HOME		#### /opt/jdk1.8.0_181
+Also apend these below commands to /etc/bashrc file to auto set environment variables on the system boot :
+  export JAVA_HOME=/opt/jdk1.8.0_181
+  export JRE_HOME=/opt/jdk1.8.0_181/jre
+  export PATH=$PATH:/opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin
+* source ~/.bashrc		#### reload .bashrc for accepting changes, without logging out
+* javac					#### should give java options
+
+
+Git tool installation :
+------------------------
+* yum install git
+
+Maven tool installation :
+-------------------------
+* cd /opt/
+* wget http://mirrors.wuchna.com/apachemirror/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.zip
+* unzip apache-maven-3.5.4-bin.zip								#### apache-maven-3.5.4 will be present now.
+* rm apache-maven-3.5.4-bin.zip
+
+Maven command will be present inside "apache-maven-3.5.3/bin/mvn". We have to set a permanent path to this command.
+* cd ~
+* vi ~/.bashrc													#### needs to apend the below code in .bashrc
+  export M2_HOME=/opt/apache-maven-3.5.4						#### needs to change as per our path (/opt/apache-maven-3.5.4)
+  export M2=$M2_HOME/bin
+  export PATH=$M2:$PATH
+* source ~/.bashrc												#### reloading the source
+* mvn --version 												
+  Maven home: /opt/apache-maven-3.5.4
+  Java version: 1.8.0_181, vendor: Oracle Corporation, runtime: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.181-3.b13.el7_5.x86_64/jre
+* echo $PATH							#### /opt/apache-maven-3.5.4/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+OR 
+
+* cd apache-maven-3.5.4/bin 
+* export PATH=$PATH:/opt/apache-maven-3.5.4/bin/		#### *mentioning relative path, the same we need to give in Jenkins without "/bin/"
+  OR
+  export PATH='.........:/opt/apache-maven-3.5.4/bin/'	#### mentioning absolute path
+* echo $PATH 											#### /usr/local/sbin:..../opt/jdk1.8.0_171/bin:/opt/jdk1.8.0_181/jre/bin:/opt/apache-maven-3.5.4/bin/
+
+Jenkins tool installation :
+---------------------------
+* wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+* rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+* yum install jenkins -y				#### Installed: jenkins.noarch 0:2.121.3-1.1
+* service jenkins start					#### starting jenkins server on port 8080
+* Go to browser, give IP_Address:8080	#### Jenkins page opens
+* Copy the password from shown address	#### /var/lib/jenkins/secrets/initialAdminPassword	# 24d69ff9c3b545298eb2ffe1e894baa1
+* Click on "Continue" and "Install suggested plugins"
+* After installations gets over for plugins, it asks to "Create First Admin User", give the details and click on "Save and Finish".
+  DO NOT click on "Continue as admin", above admin user will not be created.
+* Now, Jenkins is ready, we can click on "Start using Jenkins".
+* chkconfig jenkins on 					#### start jenkins automatically, when the system is up/reboots every time.
+
+
+Important files/directories in /var/lib/jenkins/ :
+--------------------------------------------------
+* config.xml
+* jobs			-> where all of our jobs (my-app) exists
+* logs
+* nodes
+* plugins
+* secret.key
+* updates
+* userContent
+* users
+* workspace
+
+
+Working on Jenkins :
+--------------------
+* Come to Jenkins_home and click on "Manage Jenkins" and "Global Tool Configuration" under which we can specify the location of Maven.
+* Come to "Maven" paragraph and click on "Add Maven", present beside of "Maven installations" tag.
+  Name 		 : maven-3					#### Give some meaningful name 
+  Uncheck "Install automatically" box
+  Maven_HOME : /opt/apache-maven-3.5.4	#### We already set this earlier.
+
+
+
+Working on Jenkins project :
+----------------------------
+1> Project "my-app" : A Jenkins freestyle project with maven and Git :
+----------------------------------------------------------------------
+* Click on "Create new jobs" and give a name to the project "my-app" and click on "Freestyle project"
+* Select "Git" under "Source code management", give the "Repositories URL" : https://github.com/javahometech/my-app (It has "src" and "pom.xml")
+* Branch to build will be "*/master" in this case.
+* Come to "Build" paragraph and click on "Add build step" and select "Invoke top-level Maven targets"
+* Under "Goals" write "clean package" [Note : Do not mention "mvn" as Jenkins automatically picks mvn keyword]
+* Finally, click on "Save" and click on "Build Now" on left side column and the build will start.
+* Come to "Build" paragraph and give below inputs :
+  Maven Version : maven-3 				#### the one which we configured in "Global Tool Configuration" appears here. Select it.
+  Goals 		: clean package
+* Click on "Save".
+  Based on above inputs, jenkins can locate the maven home directory and it automatically locates "mvn" command under that build.
+* Build the project and it will go successfull. (Building war: /var/lib/jenkins/workspace/my-app/target/myweb-0.0.1.war)  
+
+
+2> Project "game-of-life-packaging" : A Jenkins freestyle project with maven and Git :
+--------------------------------------------------------------------------------------
+* For creating a new job, click on "New Item" and select anyone among four from the list.
+* For "Freestyle project", important points :
+  - "Name" - game-of-life-packaging
+  - "Discard Old Builds" - For deciding the interval after which old builds should get deleted.
+  - "This build is parameterized" -> Add Parameter -> String Parameter - Asks for inputs before starting the build job.
+  - "Source Code Management" -> Git -> For syncing Git will the job.
+    Repository URL 	  : https://github.com/wakaleo/game-of-life
+	Credentials	   	  : None
+	Branches to build : */master
+	
+* Build Triggers -> Poll SCM - Instructs job to start build as soon as any commit is done in Git repository.
+  Schedule : *****
+* Build -> Invoke top-level Maven targets -> Goals -> clean package
+  Here, we gave the build steps
+* Execute shell -> Commands - We give linux commands over here.
+* Click on "Save".
+  Based on above inputs, jenkins can locate the maven home directory and it automatically locates "mvn" command under that build.
+* Build the project and it will go successfull. (Building war: /var/lib/jenkins/workspace/game-of-life-packaging/gameoflife-web/target/gameoflife.war)
+

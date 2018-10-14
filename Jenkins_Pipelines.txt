@@ -1,0 +1,156 @@
+Example of Jenkins which will do following operations :
+-------------------------------------------------------
+- Jenkins pulls the latest code from Git repo.
+- Jenkins does a compile and creates a docker image.
+- Docker image is pushed in docker hub.
+- Run the command in remote machine which pulls image form Docker hub and run in Dev environment.
+
+
+* Create two machines in AWS ('Jenkins_ma' & 'my-app-dev')
+  Jenkins_ma - Where Jenkins is installed.
+  my-app-dev - Where Jenkins will deploy the container.
+
+* Start Jenkins on 'Jenkins_ma', log in into Jenkins and click on "create new jobs".
+* Give the name of job as "docker-ap" and select "Pipeline" and click on "OK".
+* Come to "Pipeline" tab and select "Pipeline script" in "Definition" field and start writing below code in "Script" fields.
+  node{
+	   stage('SCM Checkout'){
+	      ####1
+	      git credentialsId: 'Adi_creds', url: 'https://github.com/javahometech/my-app'
+		  #### git credentialsId: 'Adi_creds', url: 'https://github.com/javahometech/my-app', branch: 'branch1'
+	   }
+	   stage('mvn Package'){
+	      ####2a
+		  #### sh 'mvn clean package' #### not working
+		  ####2b
+		  def mvnHome = tool name: 'maven-3', type: 'maven' #### give path of Maven
+		  def mvnCMD  = "${mvnHome}/bin/mvn"				#### interpolation should be put inside double quotes ".."
+		  sh "${mvnCMD} clean package"
+	   }
+	   stage('Build Docker Image'){
+	      sh 'docker build -t aditya/my-app:2.0.0 .'		#### 'aditya' is username, 'my-app' is image name and '2.0.0' is the version name
+	   }													#### "chmod 777 docker.sock" done to fix the access issue
+	   stage('Push Docker Image'){
+	      // sh 'docker login -u aditya -p '???'			#### We must not write our password in normal characters. We need to use a propert called
+																 'Binding credentials'. It binds our credentials to few variables and we can use that
+																 variable in place of our credentials.
+	      // sh 'docker push aditya/my-app:2.0.0'			#### pushing image 'my-app:2.0.0' to docker hub
+		  ####3
+		  withCredentials([string(credentialsId: 'docker-pwd', variable: 'AdiDockerPwd')]) {
+	      sh "docker login -u aditya -p ${AdiDockerPwd}"
+	      }
+		  sh 'docker push aditya/my-app:2.0.0'				#### pushing image 'my-app:2.0.0' to docker hub
+	   }
+	   stage('Run container on Dev server'){
+	      // we need to run this container on remote machine, so we need to do ssh-agent and then run below command
+	      // sh 'docker run -p 8080:8080 -dt --name my-app aditya/my-app:2.0.0'
+		  ####4
+		  def dockerRun = 'docker run -p 8080:8080 -dt --name my-app aditya/my-app:2.0.0'
+		  sshagent(['dev-server']) {
+	         //some block
+		     sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.18.198 ${dockerRun}"	#### internal IP address of dev-machine
+		  }
+	   }
+  }
+
+* Afte writting above scripts, click on "Save button" and click on "Build Now".
+* Open "dev-machine" ip in browser, 35.154.208.52:8080 (public IP address of dev-machine) and a Tomcat will be running.
+  This Tomcat is running on a container. So, we have to give the war file name to see our application running on Tomcat.
+  Check the name of war file in console under 'Build' messages. It is showing below :
+  Building war: /var/lib/jenkins/workspace/docker-app/target/myweb-0.0.1.war
+* Give the following in browser : 35.154.208.52:8080/myweb-0.0.1.war 
+  And we can see the app running on Tomcat which is running on a container on dev-machine.
+  
+  
+* 35.23 completed
+*****************************************************************************************************************************************************  
+  #1 - Open "Pipeline Syntax" in a new tab.
+     - Sample Step 			 = git: Git
+	 - Repository URL   	 = https://github.com/javahometech/my-app
+	 - Branch				 = master
+	 - Credentials			 = none
+	   If we have a private repository, we need to clcik on "Add" button and select "jenkins". A new page will pop-up. We need ot give :
+	     Domain 	 : Global credentials (unrestricted)			#### Default
+	     Kind		 : Username with password
+	     Scope	 	 : Global (Jenkins, nodes, items, all child items, etc)
+	     Username  	 : AdityaHome
+	     Password  	 : *****				#### Git Hub Password
+	     Id		 	 : Adi_creds
+	     Description : Adi_creds
+	   Click on "Add" button and the pop-up windown would close.
+	   Select "AdityaHome/******** (Adi_creds)" will come in drop-down of "Credentials" options, select it.
+	 - Include in polling ?	 = *
+	 - Include in changelog? = *
+	 - Click on "Generate Pipeline Script" box. Copy the whole generated code in #1.
+	 - Code generated is :
+	   git credentialsId: 'Adi_creds', url: 'https://github.com/javahometech/my-app'
+
+*****************************************************************************************************************************************************
+  #2a- Open "Pipeline Syntax" in a new tab.
+     - Sample Step 			 = sh: Shell Script
+	 - Shell Script			 = mvn clean package
+	 - Click on "Generate Pipeline Script" box. Copy the whole generated code in #2.
+	 - Code generated is :
+	   sh 'mvn clean package'
+  [The build will fail with message "mvn: command not found"]
+  
+  #2b- Come to "Jenkins" home page and come to "Global Tool Configuration" and come to "Maven" paragraph and click on "Maven Installations.."
+       Name : maven-3
+	 - Open "Pipeline Syntax" in a new tab.
+     - Sample Step 	= tool: Use a tool from a predefined Tool Installation
+	 - Tool Type 	= Maven
+	 - Tool		 	= maven-3
+	 - Click on "Generate Pipeline Script" box. Copy the whole generated code in #2.
+	 - Code generated is :
+	   tool name: 'maven-3', type: 'maven'
+
+*****************************************************************************************************************************************************
+  #3 - Open "Pipeline Syntax" in a new tab.
+	 - Sample Step 			 = withCredentials: Bind credentials to variables
+	 - Scroll down "Add" button under "Bindings" tag and select "Secret text"
+	 - Variable 	= AdiDockerPwd			#### Can be any variable name
+	 - Click on "Add" button, present beside of "Credentials" tag and select "Jenkins". A new page will pop-up. We need ot give :
+	     Domain 	 : Global credentials (unrestricted)			#### Default
+	     Kind		 : Secret text
+	     Scope	 	 : Global (Jenkins, nodes, items, all child items, etc)
+	     Secret		 : *****			#### Docker Hub Password
+	     Id		 	 : docker-pwd
+	     Description : docker-pwd
+	     Click on "Add" button and the pop-up windown would close.
+	     Select "docker-pwd..." will come in drop-down of "Credentials" options, select it.
+	 - Click on "Generate Pipeline Script" box. Copy the whole generated code in #1.
+	 - Code generated is :
+	   withCredentials([string(credentialsId: 'docker-pwd', variable: 'AdiDockerPwd')]){
+	   //some block
+	   }
+				
+*****************************************************************************************************************************************************
+  #4 - Jenkins home page -> Manage Jenkins -> Manage Plugins -> Available -> "SSH Agent Plugin"
+     - Open "Pipeline Syntax" in a new tab.
+	 - Sample Step 			 = sshagent: SSH Agent
+	 - Click on "Add" button and select "Jenkins". A new page will pop-up. We need to give :
+	     Domain 	 : Global credentials (unrestricted)			#### Default
+	     Kind		 : SSH Username with private key
+	     Scope	 	 : Global (Jenkins, nodes, items, all child items, etc)
+	     Username	 : ec2-user
+		 Private Key : Enter directly		#### copy the private key of dev-machine including "...BEGIN RSA PRIVATE KEY" & "End RSA PRIVATE KEY..."
+		 Passphrase	 : 
+		 Id		 	 : dev-server
+	     Description : dev-server
+		 Click on "Add" button and the pop-up windown would close.
+	     Select "ec2-user (dev-server)" will come in drop-down.
+	 - Click on "Generate Pipeline Script" box. Copy the whole generated code in #1.
+	 - Code generated is :
+	   sshagent(['dev-server']){
+	   //some block with following code taken from example : "{sh "ssh -o StrictHostKeyChecking=no user@172.XX.XX.XXX command}
+	   }
+	   sh 'ssh -o StrictHostKeyChecking=no'
+
+*****************************************************************************************************************************************************
+	 'src', 'Dockerfile', 'Jenkinsfile', 'deploy-to-tomcat', 'deploy-war-to-tomcat', 'function-demo' etc..
+	 Dockerfile Content :
+	 FROM tomcat:8
+	 # Take the war and copy to webapps of tomcat
+	 COPY target/*.war  /usr/local/tomcat/webapps/
+	 
+	 
