@@ -1,0 +1,180 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---- master (p1,p2,p3) ---- master2(p1,p2,p3)--- master3(p11,p2,p3)
+		|											|
+		 ----> b1(p11,p2,p3)---- merge success ---->
+
+
+
+---- master (p1,p2,p3) ---- master2(p1,p22,p3)--- master3(p1,p22,p33)
+		|											|
+		 ----> b1(p11,p2,p3)---- merge conflict --->
+
+
+
+---- master (p1,p2,p3) ---- master2(p1,p22,p3)--- master3(p1,p22,p33)----master4(p11,p22,p33)
+		|											|							  /|\					|
+		 ----> b1(p11,p2,p3)------------------------|--- b1(p11,p22,p33)-- rebase -|
+	
+
+
+cron --- poll scm
+* Poll SCM periodically polls the SCM to check whether changes were made (i.e. new commits) and builds the project if new commits where pushed since the last build, 
+  But build periodically builds the project periodically even if nothing has changed.
+
+* https://dev.to/neshaz/when-to-use-git-reset-git-revert--git-checkout-18je	- When to Use Git Reset, Git Revert & Git Checkout
+
+* https://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/ - cron jobs in linux
+
+* https://www.mirantis.com/blog/introduction-to-yaml-creating-a-kubernetes-deployment/ 	- Introduction to YAML: Creating a Kubernetes deployment
+
+* https://jenkins.io/doc/book/pipeline/		- Jenkins pipeline/
+* https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md	- Jenkins pipeline/
+
+* Ravikanth ---- Linux : awk and sed
+
+* Debasish ---- https://aws.amazon.com/what-is-cloud-computing/?nc2=h_l2_cc 
+
+======================================================================================================================================================================
+
+* revert (3 commits) and reset (1 Commit)
+
+touch and add f1
+commit -am "adding f1" ----> ha1
+
+touch and add f2
+commit -am "adding f2" ----> ha2
+
+touch and add f3
+commit -am "adding f3" ----> ha3
+
+git reset ha2 --soft
+ls	: f1, f2, f3
+
+git reset ha2 --hard
+ls - f1 f2
+----------------------------------------
+git revert ha2
+ls - f1 f3 - ha4
+
+* 40d8d38 (HEAD -> master) add f1
+* c6ad707 (HEAD -> master) add f2
+  40d8d38 add f1
+* f18cffc (HEAD -> master) add f3
+  c6ad707 add f2
+  40d8d38 add f1
+   
+=======================================
+
+9257058 (HEAD -> master) modified f1
+ef2bc98 (b1) add f1 f2
+
+touch and add f1 f2
+commit -am "add files"
+git branch b1
+modify and commit f1 in master
+checkout b1 and modify and commit f2
+checkout master and merge b1 - changes in b1 are reflecting in master
+
+
+touch add commit f1 in master
+git branch b1
+modify and commit f1 in master 
+git checkout b1 - modify and commit f1 in b1
+checkout master - git merge b1 "merge conflict"
+in master, vim f1, keep changes and save it. The same kept changes will be there in f1 of b1
+come to b1, commit the new changes
+come to master, git merge b1 and b1 will get merged finally.
+=======================================
+
+f1 f2 - master
+f1 f2 - b1
+
+f11 f2 - master
+f1 f2 - b1
+
+f11 f2 - master
+f1 f22 - b1
+
+in b1 - git rebase master
+f11 f2 - master
+f11 f22 - b1
+
+in master - git merge b1
+f11 f22 - master
+f11 f22 - b1
+=======================================
+Merge :
+
+touch, add and commit f1 f2 in master
+create branch b1 and checkout b1
+modify f2 and commit it in b1
+checkout master, modify and commit f1 in master
+git merge b1
+
+master -- f1 f2
+b1 	   -- f1 f2 -- f1, f22 - merge to master
+git merge b1 -> master -- f11 f22
+
+Commit Ids :
+------------
+a5a17a5 (HEAD -> master) modified f1 in master
+1f109f9 (b1) add f1 f2
+
+
+a17f5d5 (HEAD -> master) Merge branch 'b1'
+836ba1f (b1) modified f2 in b1
+a5a17a5 modified f1 in master
+1f109f9 add f1 f2
+=======================================
+Rebase :
+
+touch, add and commit f1 f2 in master
+create and checkout branch b1
+modify and commit f2 in b1
+checkout master, modify and commit f1 in master
+checkout b1 and git rebase master
+checkout master and git merge b1
+
+master : f1 f2	-- f1  f22
+b1 	   : f1 f2	-- f11 f2 - git rebase master --- f11, f22
+master - git merge b1
+
+Commit Ids :
+------------
+da0003c (HEAD -> master) m f1 master
+d602ffc (b1) add f1 f2
+
+
+1b9f2c0 (HEAD -> master, b1) modified f2 in b1
+da0003c modified f1 in master
+d602ffc add f1 f2
+
+=======================================
+Merge conflict :
+
+master : f1 f2 - modify f1 to f12 and commit
+b1 : f1 f2 - modify f1 to f11 and commit
+
+git merge b1 -- merge conflict
+
+=======================================
+Stash :
+
+Master : f1 f2
+master : modify f1 but do not commit
+git checkout b1 : will not allow (aborted message)
+git stash : will give stash id
+git checkout b1 : now it is allowing
+come back to master - git stash apply <stash id> -- stash will get applied but it will remain in stash list   <stash id> =stash@{0}
+come back to master - git stash pop  <stash id> -- stash will get applied and it will be removed from stash list
+======================================================================================================================================================================
+======================================================================================================================================================================
+Need to learn :
+CI 		 - clean install
+snapshot - clean deploy (in POM, we will put artifactory URLs)
+SONAR	 - clean  ?
+RC		 - release plugins
+
+maven - profiles and goals
+======================================================================================================================================================================
