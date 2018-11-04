@@ -1,0 +1,107 @@
+01. Explain the process you followed in Build and release
+02. What are the tools you used in Build and release
+03. Do you have any idea on configuration management tools.
+04. How you made changes to pom.xml if you get new branch/requirement
+05. Do you know about web hooks and explain about them did you use them.
+06. 5 users are there how do you identify changes are happened and who made changes.
+07. How you will do access restrictions in Git
+08. How you will merge explain							---- done
+09. What you will do in repository and artifactory. What tool you are using.	---- done
+10. What scripting languages you know?
+11. Why you want to change the job?
+12. Which kind of tools you are using for tracking purpose
+13. How you will see changes in Trac
+14. list 1st coloumn and last coloumn in a file.
+15. rename a file with current date.						---- cat file1"$(date +%d%m%y)"
+16. remove duplicate names in a file and count other names.
+17. how to automate whether page is loaded or not.
+18. how to check whether it is added to cart.
+19. jambobackground jobs.
+20. how to identify the app is down if everything configuration are correct.
+21. How could be jenkins safe.
+22. what is the difference b/w programming language and scripting.
+23. How you will take jenkins back up?
+24. How the authentacation happens in master slave.
+25. If any thing is down in production how you will check?
+26. expalin about checking the process through commands?
+27. How to kill the process ?							---- donw
+28. what is the diff between Kill pid and kill -9 pid?				---- done
+29. what is the difference b/w maven validate and maven verify?
+30. how to run junits through jenkins?
+31. explain about artifactory?
+32. Explain if you handle any shell script in jenkins?
+33. Explain about Git and Jenkins and cloud what you handled in project?
+34. Explain about jdk jre and jvm? (Dev Kit, Runtime Env, Virtual Machine)	---- done - https://www.journaldev.com/546/difference-jdk-vs-jre-vs-jvm
+35. What is inheritance?
+36. What is overloading?
+37. How much knowledge you have in java ?
+
+38. How to copy from one linux server to another ?
+39. how to connect from one linux server to another				---- done
+40. what is difference b/w public and private (in key generation)
+41. write a shell scriptfor switch case expression?
+42. Shell sciprt to replace particular data with another (sed)			---- done - sed 's/Oop/Wee/' lsst.txt - Replace Oop with Wee for Ist occurrence on a line
+43. currently runing process ?							---- done
+44. find last 30 days files and delete ?
+
+45. difference b/w fetch and pull in git ?
+46. difference b/w svn and git ?
+47. Git stash ?									---- done
+48. Git push and checkout ? (how to move from one branch to another)		---- done
+49. Git merge ?									---- done
+50. Git bare repoistory ?
+51. web books (git) (job will trigger automatically when give jenkins url in git) 
+
+52. jenkins master slave set up ?						---- done
+53. jenkins master slave authinication ?					---- done
+54. plugins configuration ?
+55. jenkins file path (grovy script file)
+56. jenkins pipeline job configuration						---- done
+57. where you put shell sciprt in jenkins to push to artifact ?
+58. what are the types of jobs in jenkins ?
+59. job triggers in jenkins
+60. build pararmeters 
+61. what are the plugins used in jenkins ?
+
+62. What is docker?								---- done
+63. what is difference b/w image and container ?				---- done
+64. how to run the container /image ?						---- done
+65. how to intergrate docker with cloud ?
+
+66. write a recipe in cheff ?							---- no
+67. is there any difference b/w cheff node and cheff server?			---- no
+68. what is difference b/w recipe and cook book ?				---- no
+69. where you will write cook book ?						---- no
+70. For a written cook book how cheff server will understand ?			---- no
+71. how node will get cofiguration from work station ?				---- no
+72. what is difference b/w cheff and ansible					---- no
+
+73. What is ansible ?
+74. what is playbook ?
+75. is any task fail will another task happens? 
+76. how to identify failure task ?
+77. How the communication happens in between nodes in ansible (100 nodes)
+78. what is yaml code ?
+79. what is difference b/w push based and pull based architecure
+
+80. how to ping server or check status of server ?				---- done
+81. write shell script to display 4th column ?
+
+82. maven commands
+83. difference b/w insatall and deploy
+84. pom.xml strucutre
+85. scheduling jobs								---- done
+86. git rebase									---- done
+87. svn git migration
+88. diff. b/w svn git
+89. git fork
+90. ci cd pipeline structure
+91. artifactory version, jenkins version
+92. types of plugins
+93. deployment process
+94. settings.xml
+95. chef puppet ansible architeture
+96. reporting - sonarcube, advantages
+97. websphere, weblogic
+
+ 
