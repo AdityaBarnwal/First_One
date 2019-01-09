@@ -1,0 +1,271 @@
+https://maven.apache.org/guides/getting-started/		- maven basics
+http://tutorials.jenkov.com/maven/maven-tutorial.html	- maven basics
+http://maven.apache.org/plugin-developers/index.html	- creating plugins
+https://jainamit333.wordpress.com/2017/08/05/difference-between-dependency-management-and-dependencies-in-maven/ - dependency management and dependencies in maven
+https://medium.com/the-code-review/how-to-use-entrypoint-with-docker-and-docker-compose-1c2062aa17a2 - Entrypoint
+https://medium.com/the-code-review/clean-out-your-docker-images-containers-and-volumes-with-single-commands-b8e38253c271 - Cleaning
+https://docs.docker.com/compose/gettingstarted/ - Compose
+
+Maven important key points :
+============================
+* Profiles activation via pom.xml: https://www.tutorialspoint.com/maven/maven_build_profiles.htm
+* Profiles activation via Maven settings : https://www.tutorialspoint.com/maven/maven_build_profiles.htm
+
+* Local repository (~/m2./repository)
+  To override the default location, mention another path in Maven settings.xml file available at %M2_HOME%\conf directory.
+<settings xmlns = "http://maven.apache.org/SETTINGS/1.0.0"
+   ...
+   <localRepository>C:/MyLocalRepository</localRepository>
+</settings>
+
+* Central repository (http://repo1.maven.org/maven2/)
+* Remote repository (developer's own custom repository)
+<project xmlns = "http://maven.apache.org/POM/4.0.0"
+   ...
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>com.companyname.projectgroup</groupId>
+   <artifactId>project</artifactId>
+   <version>1.0</version>
+   <dependencies>
+      <dependency>
+         <groupId>com.companyname.common-lib</groupId>
+         <artifactId>common-lib</artifactId>
+         <version>1.0.0</version>
+      </dependency>
+   <dependencies>
+   <repositories>
+      <repository>
+         <id>companyname.lib1</id>
+         <url>http://download.companyname.org/maven2/lib1</url>
+      </repository>
+      <repository>
+         <id>companyname.lib2</id>
+         <url>http://download.companyname.org/maven2/lib2</url>
+      </repository>
+   </repositories>
+</project>
+
+* Use of "<execution>" and "<configuration>" tags
+<build>
+   <plugins>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <version>1.1</version>
+         <executions>
+            <execution>
+               <id>id.clean</id>
+               <phase>clean</phase>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+               <configuration>
+                  <tasks>
+                     <echo>clean phase</echo>
+                  </tasks>
+               </configuration>
+            </execution>     
+         </executions>
+      </plugin>
+   </plugins>
+</build>
+
+* External Dependencies :
+An external dependency in Maven is a dependency (JAR file) which is not located in a Maven repository (neither local, central or remote repository). 
+It may be located on your local hard disk. The word "external" thus means external to the Maven repository system - not just external to the project. 
+Most dependencies are external to the project, but few are external to the repository system (not located in a repository). 
+You configure an external dependency like this:
+
+<project xmlns = "http://maven.apache.org/POM/4.0.0" 
+   ...
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>com.companyname.bank</groupId>
+   <artifactId>consumerBanking</artifactId>
+   <packaging>jar</packaging>
+   <version>1.0-SNAPSHOT</version>
+   <name>consumerBanking</name>
+   <url>http://maven.apache.org</url>
+
+   <dependencies>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>3.8.1</version>
+         <scope>test</scope>
+      </dependency>
+
+      <dependency>													---- external dependency
+         <groupId>ldapjdk</groupId>
+         <artifactId>ldapjdk</artifactId>
+         <scope>system</scope>
+         <version>1.0</version>
+         <systemPath>${basedir}\src\lib\ldapjdk.jar</systemPath>	---- Path of external dependency
+      </dependency>
+   </dependencies>
+
+</project>
+
+consumerBanking -> .settings
+				-> src -> lib -> ldapjdk.jar
+					   -> main
+					   -> test
+				-> target -> .classpath, .project
+				-> pom.xml
+				
+- External dependencies (library jar location) can be configured in pom.xml in same way as other dependencies.
+- Specify groupId same as the name of the library.
+- Specify artifactId same as the name of the library.
+- Specify scope as system.
+- Specify system path relative to the project location.
+
+* mvn site
+  Creates documentation of the application in one go in C:\MVN\consumerBanking\target\site folder. Click on index.html to see the documentation.
+
+* Snapshot - A special version that indicates a current development copy. 
+  Unlike regular versions, Maven checks for a new SNAPSHOT version in a remote repository for every build.
+  In case of SNAPSHOT, Maven automatically fetches the latest SNAPSHOT on daily basis.
+  You can also force maven to download latest snapshot build using -U switch to any maven command : mvn clean package -U
+  
+  In case of Version, if Maven once downloaded the mentioned version say data-service:1.0, it will never try to download a newer 1.0 available in repo.
+  To download the updated code, data-service version is be upgraded to 1.1.
+  
+* Dependency management - https://jainamit333.wordpress.com/2017/08/05/difference-between-dependency-management-and-dependencies-in-maven/
+
+* Parent-Child relation in POM.xml - https://jainamit333.wordpress.com/2017/08/05/difference-between-dependency-management-and-dependencies-in-maven/
+
+* Optional dependency - If A depends upon B and B depends upon C. Now, if B marked C as optional, then A will not use C.
+
+* Scope - compile, provided, runtime, test, system and import
+
+* Build the project offline : mvn o package
+
+* download external dependencies
+
+Maven Plugins :
+===============
+* maven-failsafe-plugin
+  Sometimes, build should not fail immediately when a test fails.
+  And continue until it has generated the Serenity aggregate reports before failing at the end of the build. 
+  To do this, we use this plugin. It runs your integration test in the integration-test phase without immediately failing the build when a test fails. 
+  Build failure is triggered later in the lifecycle, during the verify phase. 
+  
+* maven-invoker-plugin
+  Kicking-off other projects builds depending on this build. This can clso be achieved through Jenkins
+<build>
+   <plugins>
+      <plugin>
+         <artifactId>maven-invoker-plugin</artifactId>
+         <version>1.6</version>
+         <configuration>
+            <debug>true</debug>
+            <pomIncludes>
+               <pomInclude>app-web-ui/pom.xml</pomInclude>
+               <pomInclude>app-desktop-ui/pom.xml</pomInclude>
+            </pomIncludes>
+         </configuration>
+         <executions>
+            <execution>
+               <id>build</id>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+            </execution>
+         </executions>
+     </plugin>
+   </plugins>
+<build>
+
+* mvn help:effective-pom 
+  With all this POM inheritance it may be hard to know what the total POM file looks like when Maven executes. 
+  The total POM file (result of all inheritance) is called the effective POM.
+  You can get Maven to show you the effective POM using this command: mvn help:effective-pom
+  
+* maven-antrun-plugin
+  For printing any message during build process
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-antrun-plugin</artifactId>
+    <version>1.1</version>
+    <executions>
+        <execution>
+            <id>id.pre-clean</id>
+            <phase>pre-clean</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+            <configuration>
+                <tasks>
+                    <echo>pre-clean phase</echo>
+                </tasks>
+            </configuration>
+        </execution>
+     </executions>
+</plugin>
+
+
+* mvn archetype:generate
+  Used to create project structure. pom.xml will also get generated.
+
+mvn archetype:generate
+-DgroupId = com.companyname.bank 
+-DartifactId = consumerBanking 
+-DarchetypeArtifactId = maven-archetype-quickstart 
+-DinteractiveMode = false
+
+MVN -> consumerBanking -> src -> main -> java -> com -> companyname -> bank
+							  -> test -> java -> com -> companyname -> bank
+							  
+Maven will also create a sample Java Source file and Java Test file. 
+Open C:\MVN\consumerBanking\src\main\java\com\companyname\bank folder, you will see App.java.
+------------------------------------------------*
+package com.companyname.bank;					|
+												|
+/**												|
+ * Hello world!									|
+ *												|
+ */												|
+public class App {								|
+   public static void main( String[] args ){	|
+      System.out.println( "Hello World!" );		|
+   }											|
+}												|
+------------------------------------------------*
+
+Open C:\MVN\consumerBanking\src\test\java\com\companyname\bank folder to see AppTest.java.
+------------------------------------------------*
+package com.companyname.bank;					|
+												|
+import junit.framework.Test;					|
+import junit.framework.TestCase;				|
+import junit.framework.TestSuite;				|
+												|
+/**												|
+ * Unit test for simple App.					|
+ */												|
+public class AppTest extends TestCase {			|
+   /**											|
+      * Create the test case					|
+      *											|
+      * @param testName name of the test case	|
+   */											|
+   public AppTest( String testName ) {			|
+      super( testName );						|
+   }											|
+												|
+   /**											|
+      * @return the suite of tests being tested	|
+   */											|
+   public static Test suite() {					|
+      return new TestSuite( AppTest.class );	|
+   }											|
+												|
+   /**											|
+      * Rigourous Test :-)						|
+   */											|
+   public void testApp() {						|
+      assertTrue( true );						|
+   }											|
+}												|
+------------------------------------------------*
+
+* 
