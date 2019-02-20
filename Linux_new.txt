@@ -1,0 +1,642 @@
+$ cat /etc/shells	
+  /bin/sh
+  /bin/dash
+  /bin/bash
+  /bin/rbash
+$ echo $BASH			#### /usr/bin/bash
+$ echo $BASH_VERSION	#### 4.3.11(1)-release
+$ date 						output : Tue Feb  5 07:36:29 CST 2019
+$ touch file1"$(date)"		output : 'fil1Tue Feb  5 07:39:49 CST 2019'
+$ touch file1"$(date +%y)"	output : file119'
+
+* searching a text/group of texts in vim
+  In command mode, type ":/****", where **** represents a text/group of texts.
+  Press enter
+  Press 'n' to see all occurrences.
+  
+* replacing a text/group of texts with another text/group of texts in vim : http://vim.wikia.com/wiki/Search_and_replace
+  In command mode, type :
+  ":%s/hello//g", will delete all occurrences of "hello"
+  ":%s/hello/hi/g", will replace "hello" with "hi" for all occurrences
+  ":%s/hello/hi/gc", will ask confirmation before replacing every word
+  ":3,7s/hello/hi/g", will replace "hello" with "hi" in line range 3rd to 7th
+  ":%s/hEllo/hi/gi", will replace "hEllo" with "hi" for all occurrences ignoring case sensitivity
+  
+* If f1 is only present in a directory
+  $ ls f1 f2
+  O/p : ls: cannot access 'f2': No such file or directory
+	    f1
+
+  $ ls f1 f2 1> f3 2> f4
+  $ cat f3		#### f1
+  $ cat f4		#### ls: cannot access 'f2': No such file or directory
+
+************************************************************************************************************************************************
+GREP :
+------
+$ ls -l | grep "Aug"
+Lists all files with “Aug” mentioned in the line.
+
+Options :
+-v : Prints all lines that do not match pattern.
+-i : Matches either upper or lowercase.
+-n : Prints the matched line and its line number.
+-c : Prints only the count of matching lines.
+-l : Prints only the names of files with matching lines (letter "l").
+
+$ ls –l 					#### f2 f2 f3
+$ ls –l | grep *2			#### f2
+$ ls –l | grep –v *2		#### f1 f3
+************************************************************************************************************************************************
+SORT :
+------
+$ ls -l | sort -k 5
+total 5
+-rw-r--r-- 1 KI3Q 1049089  39 Feb  8 05:24 f2
+-rw-r--r-- 1 KI3Q 1049089  41 Feb  8 05:37 f4
+-rw-r--r-- 1 KI3Q 1049089  47 Feb  7 04:55 f1
+-rw-r--r-- 1 KI3Q 1049089  76 Feb  8 05:24 f3
+-rwxr-xr-x 1 KI3Q 1049089 156 Feb  7 06:37 s1.sh*
+--------------------------------------------------------------------------------------------------
+$ bash-4.4$ ls -l | sort -rk 5
+-rwxr-xr-x 1 KI3Q 1049089 156 Feb  7 06:37 s1.sh*
+-rw-r--r-- 1 KI3Q 1049089  76 Feb  8 05:24 f3
+-rw-r--r-- 1 KI3Q 1049089  47 Feb  7 04:55 f1
+-rw-r--r-- 1 KI3Q 1049089  41 Feb  8 05:37 f4
+-rw-r--r-- 1 KI3Q 1049089  39 Feb  8 05:24 f2
+--------------------------------------------------------------------------------------------------
+$ bash-4.4$ ls -l | sort -k5 -k8	#### first sort with 5th column and then sort with 8th column
+--------------------------------------------------------------------------------------------------
+$ bash-4.4$ ls -l | sort -k7
+total 5
+-rw-r--r-- 1 KI3Q 1049089  47 Feb  7 04:55 f1
+-rwxr-xr-x 1 KI3Q 1049089 156 Feb  7 06:37 s1.sh*
+-rw-r--r-- 1 KI3Q 1049089  39 Feb  8 05:24 f2
+-rw-r--r-- 1 KI3Q 1049089  76 Feb  8 05:24 f3
+-rw-r--r-- 1 KI3Q 1049089  52 Feb  8 06:40 f4
+--------------------------------------------------------------------------------------------------
+$ bash-4.4$ ls -l | sort -k7,8 -u	#### 8th column is unique
+total 5
+-rw-r--r-- 1 KI3Q 1049089  47 Feb  7 04:55 f1
+-rwxr-xr-x 1 KI3Q 1049089 156 Feb  7 06:37 s1.sh*
+-rw-r--r-- 1 KI3Q 1049089  39 Feb  8 05:24 f2
+-rw-r--r-- 1 KI3Q 1049089  52 Feb  8 06:40 f4
+--------------------------------------------------------------------------------------------------
+
+$ sort file1 | uniq -c				#### displays the number of occurrence and the record
+$ sort file1 | uniq -d				#### displays only the duplicate records
+$ sort file1 | uniq					#### displays distinct records
+
+************************************************************************************************************************************************
+Integer comparison :
+--------------------
+-eq : if [ "$a" -eq "$b" ]				#### same for -ne, -gt, -ge, -lt, -le
+<	: if (("$a" < "$b"))				#### same for <=, >, >= 
+
+* s1.sh
+#!/bin/bash
+echo "Entered word : $1"
+# word_name = $1
+if [ $1 -gt 10 ]
+then echo "$1 is greater than 10"
+elif [ $1 -eq 10 ]
+then echo "$1 is equal to 10"
+else echo "$1 is less than 10"
+fi
+
+String comparison :
+-------------------
+=   : if [ "$a" = "$b" ]				#### same for ==, !=
+<	: if [[ "$a" < "$b" ]]				#### same >
+-z  : if string is null
+
+* s1.sh
+#!/bin/bash
+read word_name
+if [ -z $word_name ]
+then echo "empty"
+else echo "not empty"
+fi
+
+File test operator :
+--------------------
+* if [ -e $file_name]					#### true if file exists, false if file is absent
+* if [ -d $dire_name]					#### true if directory exists, false if directory is absent
+* if [ -r $file_name]					#### true if it is readable, false if it is not read able
+* if [ -w $file_name]					#### true if it is writeable, false if it is not write able
+* if [ -x $file_name]					#### true if it is executeable, false if it is not executeable
+* if [ -s $file_name]					#### true if it has records, false if it is empty
+
+* s1.sh
+#!/bin/bash
+if [ -e $file_name ]
+then echo "file $file_name exists"
+else echo "file $file_name does not exists"
+fi
+
+-d FILE	FILE exists and is a directory.
+-e FILE	FILE exists.
+-r FILE	FILE exists and the read permission is granted.
+-w FILE	FILE exists and the write permission is granted.
+-x FILE	FILE exists and the execute permission is granted.
+-s FILE	FILE exists and it's size is greater than zero (ie. it is not empty).
+
+Logical operator :
+------------------
+* if [ "$age" -gt 18 ] && [ "$age" -lt 30 ]
+* if [[ "$age" -gt 18 && "$age" -lt 30 ]]
+* if [ "$age" -gt 18 -a "$age" -lt 30 ]			#### '-a' is 'and'
+* if [ "$age" -gt 18 ] || [ "$age" -lt 30 ]
+* if [[ "$age" -gt 18 || "$age" -lt 30 ]]
+* if [ "$age" -gt 18 -o "$age" -lt 30 ]			#### '-o' is 'or'
+
+* s1.sh
+#!/bin/bash
+
+echo "Entered word : $1"
+# word_name = $1
+if [ $1 -gt 10 ] || [ $1 -lt 10 ]
+then echo "$1 is not equal to 10" > f2
+else echo "$1 is equal to 10" > f3
+fi
+************************************************************************************************************************************************
+Shell program :
+---------------
+* s1.sh
+#!/bin/bash
+echo "Enter names : "
+read name1 name2 name3
+echo "Names : $name1 , $name2 , $name3"
+
+./s1.sh
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+read -p  'username : ' user_var
+read -sp 'password : ' pass_var
+echo
+echo "username : $user_var"
+echo "password : $pass_var"
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+echo "Enter names : "
+read -a names
+echo "Names : ${names[0]}, ${names[1]}, ${names[3]}"
+
+I/p : adi swas abhi shanu
+O/p : adi swas shanu
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+echo "Enter name : "
+read
+echo "Name : $REPLY"
+I/p : adi
+O/p : adi
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+echo $0 $1 $2 $3 "> echo $1 $2 $3"
+args=("$@")								#### $@ stores all passed arguments in a array
+echo ${args[0]} ${args[1]} ${args[2]}
+echo $@									#### I/p : mark tom john,, O/p : s1.sh mark tom john
+echo $#									#### $# counts the number of passed arguments
+I/p : ./s1.sh mark tom john
+O/p : s1.sh mark tom john > echo $1 $2 $3
+	  mark tom john
+	  mark tom john
+	  3
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+count=10
+if [ $count -eq 10 ]					#### if (($count -eq 10))
+then 
+  echo "condition is true"
+elif [ $count -----]
+then
+  echo "given some other condition"
+else 
+  echo "condition is false"
+fi
+--------------------------------------------------------------------------------------------------
+
+* s1.sh
+#!/bin/bash
+if [ -z $1 ]
+then echo "null"
+else echo "not null"
+fi
+
+I/p : ./s1.sh 
+O/p : null
+
+I/p : ./s1.sh da
+O/p : not null
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+num1=20
+num2=5
+num3=20.5
+echo $(( num1 + num2 ))					#### 25
+echo $(( num1 - num2 ))					#### 15
+echo $(( num1 * num2 ))					#### 100
+echo $(( num1 / num2 ))					#### 4
+echo $(( num1 % num2 ))					#### 0
+
+echo $(expr $num1 + $num2 )				#### 25
+echo $(expr $num1 - $num2 )				#### 15
+echo $(expr $num1 * $num2 )				#### expr: syntax error
+echo $(expr $num1 \* $num2 )			#### 100
+echo $(expr $num1 / $num2 )				#### 4
+echo $(expr $num1 % $num2 )				#### 0
+
+echo "20.5+5" | bc						#### 25.5
+echo "20.5-5" | bc						#### 15.5
+echo "20.5*5" | bc						#### 102.5
+echo "20.5/5" | bc						#### 4 (incorrect)
+echo "scale=2;20.5/5" | bc				#### 4.10 (correct), scale=2 means up to two place of decimal
+echo "20.5%5" | bc						#### .5
+
+echo "$num3+$num2" | bc					#### 25.5
+echo "$num3-$num2" | bc					#### 15.5
+echo "$num3*$num2" | bc					#### 102.5
+echo "$num3/$num2" | bc					#### 4 (incorrect)
+echo "scale=2;$num3/$num2" | bc			#### 4.10 (correct), scale=2 means up to two place of decimal
+echo "$num3%$num2" | bc					#### .5
+
+echo "scale=2;sqrt($num)" | bc -l		#### will find the square root of num, "-l" is for invoking maths library
+echo "scale=2;$num^3)" | bc -l			#### will find the value of numto the power of 3, "-l" is for invoking maths library
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+
+vehicle=$1
+case $vehicle in
+  "car" )
+    echo "a car" ;;
+  "van" )
+    echo "a van" ;;
+  * )
+    echo "unknown"
+esac
+
+echo "Entered word : $1"
+# word_name = $1
+case $1 in
+    hello)
+      echo "hello" ;;
+    hi)
+      echo "hi" ;;
+    *) echo something ;;
+    *) echo something ;;
+esac
+
+--------------------------------------------------------------------------------------------------
+$LANG=C							#### setting LANG variable encoding
+* s1.sh
+#!/bin/bash
+
+echo -e "Enter character : \c"
+read value
+case $value in
+  [a-z] )
+    echo "It is a-z" ;;
+  [A-Z] )
+    echo "It is A-Z" ;;
+  [0-9] )	
+    echo "It is 0-9" ;;
+  ? )
+    echo "special character" ;;
+  * )
+    echo "unknown" ;;
+esac
+--------------------------------------------------------------------------------------------------
+
+* s1.sh
+#!/bin/bash
+os=('ab' 'bc' 'cd')
+os[6]='de'
+echo "${os[1]}"					#### bc
+echo "${os[@]}"					#### ab bc cd de
+echo "${!os[@]}"				#### 0 1 2 6
+echo "${#os[@]}"				#### 4
+unset os[2]
+echo "${!os[@]}"				#### 0 1 6
+echo "${#os[@]}"				#### 3
+
+string1=abcd					#### variable name is always an array with 1 element
+echo "${string[@]}"				#### abcd
+echo "${string[0]}"				#### abcd
+echo "${string[1]}"				#### nothing
+echo "${#string[@]}"				#### 1
+--------------------------------------------------------------------------------------------------
+* s1.sh
+#!/bin/bash
+n=1
+while [ $n -le 3 ]				#### while (( $n <= 3 ))
+do
+  echo "$n"
+  n=$(( n+1 ))					#### (( n++ ))
+  sleep 1						#### sleep for 1 second
+  gnome-terminal &				#### xterm & #### opens a new terminal at background
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+n=1
+until [ $n -ge 10 ]				#### while (( $n >= 10 ))
+do
+  echo "$n"						#### 1-9
+  n=$(( n+1 ))					#### (( n++ ))
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+for var1 in 1 2 3 4 5
+do
+  echo $var1
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+for var1 in {1..10}				#### 1 is start, 10 is end
+do
+  echo $var1
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+for var1 in {1..10..2}			#### 1 is start, 10 is end, 2 is increment value
+do
+  echo $var1
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+for (( var1=0; var1<5; i++ ))
+do
+  echo $var1
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash						#### use of 'break' 
+for (( var1=0; var1<10; i++ ))
+do
+  if [ $var1 -gt 5 ]
+  then
+    break
+  fi
+  echo $var1
+done
+
+O/p : 1 2 3 4
+--------------------------------------------------------------------------------------------------
+#!/bin/bash						#### if 'continue' is met, all statements under it will be skipped and the loop starts again
+for (( var1=0; var1<10; i++ ))
+do
+  if [ $var1 -eq 3 -o $var1 -eq 6 ]
+  then
+    continue
+  fi
+  echo $var1
+done
+
+O/p : 1 2 4 5 7 8 9
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+for command in ls pwd date
+do
+  echo "**** $command ****"
+  echo $command
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash						#### listing out directories in current folder
+for item in *
+do
+  if [ -d $item ]				#### if [ -e $item ] checking files in current folder
+  then
+    echo $item
+  fi
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+select name in mak jon tom ben
+do
+  echo "$name selected"
+done
+
+O/p : 
+1) mak
+2) jon
+3) tom
+4) ben
+#? 2
+john selected
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+select name in mak jon tom ben
+do
+  case $name in
+  mak )
+    echo "mak selected" ;;
+  jon )
+    echo "jon selected" ;;
+  tom )
+    echo "tom selected" ;;
+  ben )
+    echo "ben selected" ;;
+  * )
+    echo "enter option from 1 to 4"
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+echo "give file name"
+read file_name
+while read var1
+do
+  echo $var1
+done < $file_name
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+cat Dockerfile | while read var1
+do
+  echo $var1
+done
+--------------------------------------------------------------------------------------------------
+#!/bin/bash
+echo "give file name"
+read file_name
+while IFS=' 'read -r var1		#### '-r' prevents '/' from being interpreted
+do
+  echo $var1
+done < $file_name
+--------------------------------------------------------------------------------------------------
+
+************************************************************************************************************************************************
+AWK commands :
+--------------
+Syntax : awk options 'selection_criteria {actions}' Input_file
+selection_criteria : Filtering condition, it will execute only once for given input file.
+actions : Executes for all records present in the given input file.
+
+Below variables will be used in 'actions' :
+$0 : entire line
+$1,$2,$3...,$n : first, second, third, .., nth column f each line in the input file.
+NR : Line number in the given input line
+NF : Number of columns in each line of the input file.
+
+Note : If you want to print the value of a variable, then we will not precede $ in front of it.
+
+Note :
+Line1 :: 2000|27|director|HTC
+Line2 :: 2000|27|director |HTC
+$3 == 'director' will find the Line1 but not the Line2
+$3 ~ 'director' will find both lines.
+
+* cat emp_s.txt
+100  |Thomas    |Manager   |Sales      |5000 |21/01/98
+200  |Jason     |Developer |Technology |5500 |22/02/89
+300  |Sanjay    |Sysadmin  |Technology |7000 |23/03/78
+400  |Nisha     |Manager   |Marketing  |9500 |24/04/87
+500  |Randy     |DBA       |Technology |6000 |25/05/67
+600  |Chowdhary |DBA       |Marketing  |7000 |26/06/76
+700  |choudhary |Manager   |Technology |8000 |27/07/93
+
+* cat emp_ns.txt
+100|Thomas|Manager|Sales|5000|21/01/98
+200|Jason|Developer|Technology|5500|22/02/89
+300|Sanjay|Sysadmin|Technology|7000|23/03/78
+400|Nisha|Manager|Marketing|9500|24/04/87
+500|Randy|DBA|Technology|6000|25/05/67
+600|Chowdhary|DBA|Marketing|7000|26/06/76
+700|choudhary|Manager|Technology|8000|27/07/93
+
+* awk -F"|" '{print $2}' emp_ns.txt									#### Printing second word of every line
+Thomas
+Jason
+Sanjay
+Nisha
+Randy
+Chowdhary
+choudhary
+
+* awk -F"|" '/DBA/ {print $1,$2,$3,$4}' emp_ns.txt					#### Printing 1,2,3,4 columns based on condition of every line
+500 Randy DBA Technology
+600 Chowdhary DBA Marketing
+
+* awk -F"|" '/[Cc]ho[wu]dhary/ {print NR,$1,$2,$3,$4}' emp_ns.txt
+6 600 Chowdhary DBA Marketing
+7 700 choudhary Manager Technology
+
+* awk -F"|" 'NR ==3,NR ==6 {print NR,$1,$2,$3,$4}' emp_ns.txt
+3 300 Sanjay Sysadmin Technology
+4 400 Nisha Manager Marketing
+5 500 Randy DBA Technology
+6 600 Chowdhary DBA Marketing
+
+* awk -F"|" 'NR ==3,NR ==6 {print NR,$1,$2,$3,$4 > "Sample.txt"}' emp_ns.txt	#### redirecting result to a new file
+--------------------------------------------------------------------------------------------------
+
+Comparison Operators : 
+* awk -F"|" '$3 == "DBA" || $3 == "Manager" {print $1,$2,$3,$4}' emp_ns.txt		#### If there are no spaces
+100 Thomas Manager Sales
+400 Nisha Manager Marketing
+500 Randy DBA Technology
+600 Chowdhary DBA Marketing
+700 choudhary Manager Technology
+
+* awk -F"|" '$3 ~ "DBA" || $3 ~ "Manager" {print $1,$2,$3,$4}' emp_s.txt		#### If there are spaces
+100   Thomas     Manager    Sales
+400   Nisha      Manager    Marketing
+500   Randy      DBA        Technology
+600   Chowdhary  DBA        Marketing
+700   choudhary  Manager    Technology
+
+* awk -F"|" '$2 == /[Cc]ho[wu]dhary/ {print $0}' emp_ns.txt						#### wrong as "===" is invalid with */[character class]
+  awk -F"|" '$2 ~ /[Cc]ho[wu]dhary/ {print $0}' emp_ns.txt
+  
+* awk -F"|" '$5 > 6000 && $4 == "Technology" {print $0,$5*.25,}' emp_ns.txt
+300|Sanjay|Sysadmin|Technology|7000|23/03/78 1750
+700|choudhary|Manager|Technology|8000|27/07/93 2000
+
+* awk -F"|" '$5 > 6000 && $4 == "Technology" {print $0"|"$5*.25}' emp_ns.txt
+300|Sanjay|Sysadmin|Technology|7000|23/03/78|1750
+700|choudhary|Manager|Technology|8000|27/07/93|2000
+--------------------------------------------------------------------------------------------------
+
+Calling awk sub-program : 
+* cat emp.awk
+$5 > 6000 && $4 == "Technology" {print $0,$5*.25,}
+
+* awk -F"|" -f emp.awk emp_ns.txt
+300|Sanjay|Sysadmin|Technology|7000|23/03/78 1750
+700|choudhary|Manager|Technology|8000|27/07/93 2000
+--------------------------------------------------------------------------------------------------
+
+Variables :
+* awk -F"|" '$4 == "Technology" && $5 > 5000 {count++; print count,$2,$3,$4,$5}' emp_ns.txt
+1 Jason Developer Technology 5500
+2 Sanjay Sysadmin Technology 7000
+3 Randy DBA Technology 6000
+4 choudhary Manager Technology 8000
+
+* awk -F"|" 'NF!=5 {print "Line No ",NR," has ",NF," columns"}' emp_ns.txt
+Line No  1  has  6  columns
+Line No  2  has  6  columns
+Line No  3  has  6  columns
+Line No  4  has  6  columns
+Line No  5  has  6  columns
+Line No  6  has  6  columns
+Line No  7  has  6  columns
+
+--------------------------------------------------------------------------------------------------
+Begin and End in awk :
+Syntax : awk options 'BEGIN { actions; }
+{ Processing statements; }
+END { actions }' Input_file
+
+BEGIN : Should be in caps. These actions will execute for only once.
+		Initialize value of a variable. Can be used to print heading before output is printed.
+		
+Processing statements : Will execute for all records present in the input file.
+
+END : Should be in caps. These actions will execute for only once.
+	  Print the output of the variable after completing the manipulation in Processing.
+	
+# Count total number of lines (Same as wc -l)
+* awk -F"|" 'BEGIN { count=0; } { count++; } END { print "Total lines : ",count; }' emp_s.txt
+* awk -F"|" '{ count++; } END { print "Total lines : ",count; }' emp_s.txt
+* awk 'BEGIN { FS="|"; count=0; } { count++; } END { print "Total lines : ",count; }' emp_s.txt
+Same output for all three commands : Total lines :  7
+
+# calculate bonus for all employees and print it along with the input file
+* awk -F"|" 'BEGIN { bouns_pct=.25; } { bonus=$5*bouns_pct; print $0"|"bonus; }' emp_s.txt
+
+# calculate bonus for all employees with salary > 6000 and print it along with the input file
+* awk -F"|" 'BEGIN { bouns_pct=.25; } $5 > 6000 { bonus=$5*bouns_pct; print $0"|"bonus; }' emp_s.txt
+300  |Sanjay    |Sysadmin  |Technology |7000 |23/03/78|1750
+400  |Nisha     |Manager   |Marketing  |9500 |24/04/87|2375
+600  |Chowdhary |DBA       |Marketing  |7000 |26/06/76|1750
+700  |choudhary |Manager   |Technology |8000 |27/07/93|2000
+
+# Count the number of employees in "Technology" department
+* awk -F"|" 'BEGIN { count=0; } $4 ~ "Technology" { count++; } END { print "Emp numbers :",count}' emp_s.txt
+  awk 'BEGIN { FS="|";count=0; } $4 ~ "Technology" { count++; } END { print "Emp numbers :",count}' emp_s.txt
+Emp numbers : 4
+
+# Printing the average salary of "Technology" department
+* awk -F"|" '$4 ~ "Technology" { count++; total = total + $5} END { print "Avg salary in Technology dept : ",total/count}' emp_s.txt
+Avg salary in Technology dept :  6625
+--------------------------------------------------------------------------------------------------
+
+Functions used in awk :
+--------------------------------------------------------------------------------------------------
+* length : Returns length of the complete line.
+* length(x) : Returns length of x.
+  Eg : length($2) -> length of second column.
+* index(s1,s2) : Returns position of string s2 in s1.
+  Eg : x=index("abcdef","b") returns 2
+* substr(str,m,n) returns portion of string of length n, starting from position m in the given string str.
+  Eg : substr("Unix",2,3) returns "nix"
+* sqrt(x) : Returns square root of x.
+* system("Unix_cmd") -> Runs unix command and returns its exit status.
+  Eg : system("date") -> Prints Unix date and time
+* split(str,arr,"/") -> Splits the string into array arr using "/" as delimiter in the string str; returns number of fields.
+  Eg : split($6,ar,"/");  if $6=29/11/79 then ar[1]=29;ar[2]=11;ar[3]=79;
