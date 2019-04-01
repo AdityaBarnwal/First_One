@@ -1,0 +1,111 @@
+https://medium.freecodecamp.org/docker-entrypoint-cmd-dockerfile-best-practices-abc591c30e21	---- Docker ENTRYPOINT & CMD: Dockerfile best practices
+https://blog.codeship.com/orchestrate-containers-for-development-with-docker-compose/		---- Dcoker compose
+https://www.mirantis.com/blog/introduction-to-yaml-creating-a-kubernetes-deployment/		---- Introducing YAML: Creating a Kubernetes deployment
+https://rominirani.com/docker-tutorial-series-writing-a-dockerfile-ce5746617cd			====> Docker Tutorial Series : Writing a Dockerfile
+https://medium.freecodecamp.org/docker-entrypoint-cmd-dockerfile-best-practices-abc591c30e21	====> Docker ENTRYPOINT & CMD: Dockerfile best practices
+https://www.mirantis.com/blog/introduction-to-yaml-creating-a-kubernetes-deployment/			====> Kubernetes
+
+https://rominirani.com/docker-tutorial-series-writing-a-dockerfile-ce5746617cd
+
+Difference Between DNS and DHCP :
+---------------------------------
+DNS maps the domain name to IP address whereas DHCP is a protocol which assigns IP to the hosts in a network be it statically or dynamically. 
+DHCP is also used while setting up the DNS server to the host.
+
+DHCP : Dynamic Host Configuration Protocol
+https://www.lifewire.com/what-is-dhcp-2625848
+
+DNS : Domain Name Server
+https://www.lifewire.com/what-is-a-dns-server-2625854
+
+* TCP (Transmission Control Protocol) : It is used for communication over a network. In TCP data is broken down into small packets and then sent to the destination.
+  However, IP is making sure packets are transmitted to the right address.
+
+* IP (Internet Protocol) : IP is also working with TCP. It is an addressing Protocol. 
+  IP addresses packets route them and show different nodes and network Unless it reaches its right destination. The IP protocol is developed in 1970.
+
+* FTP (File Transfer Protocol) : It is basically used for transferring files to different networks. 
+  There may be a mass of files such as text files, multimedia files, etc. This way of file transfer is quicker than other methods.
+
+* SMTP (Simple Mail Transfer Protocol) : It manages the transmission and outgoing mail over the internet.
+
+* HTTP (Hyper Text Transfer Protocol) : It is based on client and server model & is used for making a connection between the web client & web server. HTTP shows information in web pages.
+
+* Ethernet : Ethernet is a most important for LAN communication. Ethernet transmits the data in digital packets. 
+  If any computer wants to use this protocol they should contain Ethernet Network Interface Card (NIC). 
+  The card is implemented with unique address code fixed in the microchip.
+  
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Creating the pod using the YAML file :
+**************************************
+* vim pod.yaml
+---
+ apiVersion: v1
+ kind: Pod					====> Specifies that we are creating a Pod; we may give 'Deployment', 'Job', 'Service', and so on.
+ metadata:					====> 
+   name: rss-site
+   labels:
+     app: web
+ spec:
+   containers:
+     - name: front-end
+       image: nginx
+       ports:
+         - containerPort: 80
+     - name: rss-reader
+       image: nickchase/rss-php-nginx:v1
+       ports:
+         - containerPort: 88
+		 
+* kubectl create -f pod.yaml			====> tell Kubernetes to create its contents:
+* kubectl get pods				====> gives the list the pods:
+* kubectl delete pod rss-site			====> deletes the pods
+* kubectl describe pod rss-site			====> To track down the problem if any container face any problem
+
+Creating a Deployment using YAML file :
+***************************************
+---
+ apiVersion: extensions/v1beta1
+ kind: Deployment
+ metadata:
+   name: rss-site
+ spec:
+   replicas: 2
+   
+* Here we’re specifying the apiVersion as extensions/v1beta1 — remember, Deployments aren’t in v1, as Pods were — and that we want a Deployment. 
+  Next we specify the name. We can also specify any other metadata we want, but let’s keep things simple for now.
+  Finally, we get into the spec. In the Pod spec, we gave information about what actually went into the Pod; we’ll do the same thing here with the Deployment. 
+  We’ll start, in this case, by saying that whatever Pods we deploy, we always want to have 2 replicas. 
+  You can set this number however you like and can also set properties such as the selector that defines the Pods affected by this Deployment, 
+  or the minimum number of seconds a pod must be up without any errors before it’s considered “ready”.
+  
+* OK, so now that we know we want 2 replicas, we need to answer the question: “Replicas of what?”  They’re defined by templates:
+
+---
+ apiVersion: extensions/v1beta1
+ kind: Deployment
+ metadata:
+   name: rss-site
+ spec:
+   replicas: 2
+   template:
+     metadata:
+       labels:
+         app: web
+     spec:
+       containers:
+         - name: front-end
+           image: nginx
+           ports:
+             - containerPort: 80
+         - name: rss-reader
+           image: nickchase/rss-php-nginx:v1
+           ports:
+             - containerPort: 88
+
+* kubectl create -f deployment.yaml		====> create the deployment with deployment.yaml file
+* kubectl get deployments				====> To see how it’s doing, it checks on the deployments list:
+* kubectl describe deployment rss-site	====> Checks the event log by describing the Deployment,
+* kubectl get deployments
