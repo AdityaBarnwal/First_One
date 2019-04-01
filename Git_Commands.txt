@@ -199,8 +199,8 @@ New Ones :
 * git branch -d[head] 
 * git diff <commit-id1> <commit-id2> <file_list>
 * git diff master b1 -- f1			#### difference in a file present in master and branch
-* difference between ‘git remote’ and ‘git clone’ - ‘git remote add’ creates an entry in git config that specifies a name for a particular URL.  
-						    ‘git clone’ creates a new git repository by copying and existing one located at the URI.
+* difference between git remote and git clone - "git remote add origin" creates an entry in git config that specifies a name for a particular URL.  
+						    "git clone URL" creates a new git repository by copying and existing one located at the URL.
 
 
 Q. How do you find a list of files that has changed in a particular commit?
@@ -210,18 +210,18 @@ A. For this answer instead of just telling the command, explain what exactly thi
    Given the commit hash, this will list all the files that were changed or added in that commit. 
    The -r flag makes the command list individual files, rather than collapsing them into root directory names only. 
    You can also include the below mentioned point, although it is totally optional but will help in impressing the interviewer.
-   The output will also include some extra information, which can be easily suppressed by including two flags:  git diff-tree –no-commit-id –name-only -r {hash}
-   Here –no-commit-id will suppress the commit hashes from appearing in the output, and –name-only will only print the file names, instead of their paths.
+   The output will also include some extra information, which can be easily suppressed by including two flags:  git diff-tree Â–no-commit-id Â–name-only -r {hash}
+   Here Â–no-commit-id will suppress the commit hashes from appearing in the output, and Â–name-only will only print the file names, instead of their paths.
 
 Q. How do you squash last N commits into a single commit?
 A. There are two options to squash last N commits into a single commit.
    - If you want to write the new commit message from scratch use the following command
-     git reset –soft HEAD~N &&
+     git reset Â–soft HEAD~N &&
      git commit
    - If you want to start editing the new commit message with a concatenation of the existing commit messages then you need to extract those messages and 
      pass them to Git commit for that I will use
-     git reset –soft HEAD~N &&
-     git commit –edit -m”$(git log –format=%B –reverse .HEAD@{N})”
+     git reset -soft HEAD~N &&
+     git commit Â–edit -mÂ”$(git log Â–format=%B Â–reverse .HEAD@{N})Â”
 
 Q. What is Git bisect? How can you use it to determine the source of a (regression) bug?
 A. I will suggest you to first give a small definition of Git bisect.
@@ -229,9 +229,9 @@ A. I will suggest you to first give a small definition of Git bisect.
 
    Now since you have mentioned the command above explain them what this command will do.
 
-   This command uses a binary search algorithm to find which commit in your project’s history introduced a bug. 
-   You use it by first telling it a “bad” commit that is known to contain the bug, and a “good” commit that is known to be before the bug was introduced. 
-   Then Git bisect picks a commit between those two endpoints and asks you whether the selected commit is “good” or “bad”. 
+   This command uses a binary search algorithm to find which commit in your projectÂ’s history introduced a bug. 
+   You use it by first telling it a Â“badÂ” commit that is known to contain the bug, and a Â“goodÂ” commit that is known to be before the bug was introduced. 
+   Then Git bisect picks a commit between those two endpoints and asks you whether the selected commit is Â“goodÂ” or Â“badÂ”. 
    It continues narrowing down the range until it finds the exact commit that introduced the change.
 
 
